@@ -38,6 +38,13 @@ $whatsapp     = new WhatsApp(
     $whatsapp->from->text; 
 ```
 
+#### Exemple
+```php
+if ( $whatsapp->from->messageType === "text" && $whatsapp->from->text === "Hi") {
+  $whatsapp->sendText($whatsapp->from->remoteJid, "Hello!");
+}
+```
+
 #### Get QrCode HTML
 ```php
 echo $whatsapp->getQrCodeHTML();
