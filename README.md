@@ -40,7 +40,7 @@ $whatsapp     = new WhatsApp(
 
 #### Exemple
 ```php
-if ( $whatsapp->from->messageType === "text" && $whatsapp->from->text === "Hi") {
+if ($whatsapp->from->messageType === "text" && $whatsapp->from->text === "Hi") {
   $whatsapp->sendText($whatsapp->from->remoteJid, "Hello!");
 }
 ```
@@ -62,7 +62,15 @@ echo $whatsapp->inforInstance();
 
 #### Update Webhook
 ```php
-$body = ["allowWebhook" => false,"webhookMessage" => "","webhookGroup" => "","webhookConnection" => "","webhookQrCode" => "", "webhookMessageFromMe"=>"", "webhookHistory"=>""]; 
+$body = [
+        "allowWebhook" => false,
+        "webhookMessage" => "",
+        "webhookGroup" => "",
+        "webhookConnection" => "",
+        "webhookQrCode" => "", 
+        "webhookMessageFromMe"=>"", 
+        "webhookHistory"=>""
+    ]; 
 echo $whatsapp->updateWebhook($body);
 ```
 
