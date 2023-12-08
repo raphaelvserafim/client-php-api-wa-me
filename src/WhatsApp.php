@@ -1,10 +1,13 @@
 <?php
 namespace Api\Wame;
 
+use stdClass;
+
 class WhatsApp
 {
   public $key;
   public $server;
+  public $from;
   private $header = array();
   private $parth;
   private $method;
@@ -936,6 +939,173 @@ class WhatsApp
 
     // Executa a requisição e retorna o resultado.
     return $this->request();
+  }
+
+  public function constructWebhook()
+  {
+
+    $isMidia = false;
+
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (!empty($data)) {
+
+      $this->from = new stdClass();
+      
+      if (isset($data["data"]["key"]["remoteJid"])) {
+        $this->from->remoteJid = preg_replace("/[^0-9]/", "", $data["data"]["key"]["remoteJid"]);
+      }
+
+      if (isset($data["data"]["key"]["id"])) {
+        $this->from->msgId = $data["data"]["key"]["id"] ?? null;
+      }
+
+      if (isset($data["data"]["push_name"])) {
+        $this->from->pushName = $data["data"]["push_name"] ?? null;
+      }
+
+      if (isset($data["data"]["messageType"])) {
+        $this->from->messageType = $data["data"]["messageType"] ?? "unknown";
+      }
+
+      if (isset($data["data"]["msgContent"]["conversation"])) {
+        $this->from->messageType = "text";
+        $this->from->text = $data["data"]["msgContent"]["conversation"];
+      }
+
+      if (isset($data["data"]["msgContent"]["extendedTextMessage"]["text"])) {
+        $this->from->messageType = "text";
+        $this->from->text = $data["data"]["msgContent"]["extendedTextMessage"]["text"];
+      }
+
+      if (isset($data["data"]["msgContent"]["buttonsResponseMessage"])) {
+        $this->from->messageType = "button";
+        $this->from->selectedId = $data["data"]["msgContent"]["buttonsResponseMessage"]["selectedButtonId"];
+      }
+
+
+      if (isset($data["data"]["msgContent"]["listResponseMessage"])) {
+        $this->from->messageType = "list";
+        $this->from->selectedId = $data["data"]["msgContent"]["listResponseMessage"]["singleSelectReply"]["selectedRowId"];
+        $this->from->title = $data["data"]["msgContent"]["listResponseMessage"]["title"];
+      }
+
+      if ($this->from->messageType == "messageContextInfo") {
+        $this->from->messageType = "list";
+        if (isset($data["data"]["msgContent"]["listResponseMessage"]["singleSelectReply"]["selectedRowId"])) {
+          $this->from->selectedId = $data["data"]["msgContent"]["listResponseMessage"]["singleSelectReply"]["selectedRowId"];
+        }
+        if (isset($data["data"]["msgContent"]["listResponseMessage"]["title"])) {
+          $this->from->text = $data["data"]["msgContent"]["listResponseMessage"]["title"];
+        }
+      }
+
+      if (isset($data["data"]["msgContent"]["reactionMessage"])) {
+        $this->from->messageType = "reaction";
+        $this->from->text = $data["data"]["msgContent"]["reactionMessage"]["text"];
+      }
+
+      if ($this->from->latitude === "locationMessage") {
+        $this->from->messageType = "location";
+        $this->from->latitude = $data["data"]["msgContent"]["locationMessage"]["degreesLatitude"];
+        $this->from->longitude = $data["data"]["msgContent"]["locationMessage"]["degreesLongitude"];
+        $this->from->thumbnail = "data:image/jpeg;base64," . $data["data"]["msgContent"]["locationMessage"]["jpegThumbnail"];
+      }
+
+      if ($this->from->messageType === "liveLocationMessage") {
+        $this->from->messageType = "liveLocation";
+        $this->from->latitude = $data["data"]["msgContent"]["liveLocationMessage"]["degreesLatitude"];
+        $this->from->longitude = $data["data"]["msgContent"]["liveLocationMessage"]["degreesLongitude"];
+        $this->from->thumbnail = "data:image/jpeg;base64," . $data["data"]["msgContent"]["liveLocationMessage"]["jpegThumbnail"];
+      }
+
+      if ($this->from->messageType === "templateButtonReplyMessage") {
+        $this->from->messageType = "button";
+        $this->from->selectedId = $data["data"]["msgContent"]["templateButtonReplyMessage"]["selectedIndex"];
+      }
+
+      if ($this->from->messageType === "audioMessage") {
+        $this->from->messageType = "audio";
+        $isMidia = true;
+      }
+      if ($this->from->messageType === "imageMessage") {
+        $this->from->messageType = "image";
+        $isMidia = true;
+      }
+
+      if ($this->from->messageType === "stickerMessage") {
+        $this->from->messageType = "sticker";
+        $isMidia = true;
+      }
+      if ($this->from->messageType === "videoMessage") {
+        $this->from->messageType = "video";
+        $isMidia = true;
+      }
+
+      if ($this->from->messageType === "documentMessage") {
+        $this->from->messageType = "document";
+        $isMidia = true;
+      }
+
+      if ($this->from->messageType === "contactMessage") {
+        $this->from->messageType = "contact";
+        $displayName = $data["data"]["msgContent"]["contactMessage"]["displayName"] ?? "";
+        $vcard = explode("\n", $data["data"]["msgContent"]["contactMessage"]["vcard"]);
+        $c_b = explode(":", $vcard[4]);
+        $contact = new stdClass();
+        $contact->name = $displayName;
+        $contact->number = $c_b[1] ?? "";
+        $this->from->contact[] = $contact;
+      }
+
+      if ($this->from->messageType === "contactsArrayMessage") {
+        $this->from->messageType = "contact";
+        for ($i = 0; sizeof($data["data"]["msgContent"]["contactsArrayMessage"]["contacts"]) > $i; $i++) {
+          $displayName = $data["data"]["msgContent"]["contactsArrayMessage"]["contacts"][$i]["displayName"];
+          $vcard = explode("\n", $data["data"]["msgContent"]["contactsArrayMessage"]["contacts"][$i]["vcard"]);
+          $c_b = explode(":", $vcard[4]);
+          $contact = new stdClass();
+          $contact->name = $displayName;
+          $contact->number = $c_b[1] ?? "";
+          $this->from->contact[] = $contact;
+        }
+      }
+
+      if ($isMidia) {
+
+        if (isset($data["data"]["msgContent"][$data["data"]["messageType"]]["mimetype"])) {
+          $this->from->mimetype = $data["data"]["msgContent"][$data["data"]["messageType"]]["mimetype"];
+        }
+        if (!empty($data["data"]["msgContent"][$data["data"]["messageType"]]["jpegThumbnail"])) {
+          $this->from->thumbnail = "data:image/jpeg;base64," . $data["data"]["msgContent"][$data["data"]["messageType"]]["jpegThumbnail"];
+        }
+
+        $this->from->messageKeys = [
+          "messageKeys" => [
+            "mediaKey" => $data["data"]["msgContent"][$data["data"]["messageType"]]["mediaKey"],
+            "directPath" => $data["data"]["msgContent"][$data["data"]["messageType"]]["directPath"],
+            "url" => $data["data"]["msgContent"][$data["data"]["messageType"]]["url"],
+            "messageType" => $this->from->messageType
+          ]
+        ];
+
+        if ($this->from->messageType !== "video") {
+          $dow = json_decode($this->downloadMediaMessage($this->from->messageKeys), true);
+          $this->from->mediaBase64 = $dow["data"] ?? "";
+        }
+        if (isset($data["data"]["msgContent"][$data["data"]["messageType"]]["title"])) {
+          $this->from->title = $data["data"]["msgContent"][$data["data"]["messageType"]]["title"];
+        }
+
+        if (isset($data["data"]["msgContent"][$data["data"]["messageType"]]["fileName"])) {
+          $this->from->caption = $data["data"]["msgContent"][$data["data"]["messageType"]]["fileName"];
+        }
+
+        if (isset($data["data"]["msgContent"][$data["data"]["messageType"]]["caption"])) {
+          $this->from->caption = $data["data"]["msgContent"][$data["data"]["messageType"]]["caption"];
+        }
+      }
+    }
   }
 
 }

@@ -28,6 +28,16 @@ $whatsapp     = new WhatsApp(
     );
 ```
 
+#### Get webhook 
+```php
+    $whatsapp->constructWebhook();
+    $whatsapp->from->remoteJid; //  number that sent message
+    $whatsapp->from->messageType; // video | text | audio| image | sticker | document| reaction | liveLocation | 
+    $whatsapp->from->msgId;
+    $whatsapp->from->pushName;
+    $whatsapp->from->text; 
+```
+
 #### Get QrCode HTML
 ```php
 echo $whatsapp->getQrCodeHTML();

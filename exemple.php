@@ -11,6 +11,14 @@ $whatsapp = new WhatsApp(
 );
 
 
+$whatsapp->constructWebhook();
+$whatsapp->from->remoteJid; //number that sent message
+$whatsapp->from->msgId;
+$whatsapp->from->pushName;
+$whatsapp->from->messageType; // | video | text | audio| image | sticker | document| reaction | liveLocation | 
+$whatsapp->from->text;
+
+
 $whatsapp->getQrCodeBase64();
 
 $whatsapp->getQrCodeHTML();
