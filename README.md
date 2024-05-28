@@ -4,7 +4,9 @@
  
 Acessar: <a href="https://api-wa.me">api-wa.me</a>
 
-<a href="https://server.api-wa.me/docs/">Swagger</a>
+<a href="https://doc.api-wa.me/">Swagger</a>
+
+<a href="https://documenter.getpostman.com/view/27660901/2sA3Qs9s7K/">Postman</a>
 
 ## Installing via composer
 
@@ -47,12 +49,7 @@ if ($whatsapp->from->messageType === "text" && $whatsapp->from->text === "Hi") {
 
 #### Get QrCode HTML
 ```php
-echo $whatsapp->getQrCodeHTML();
-```
-
-#### Get QrCode Base64
-```php
-echo $whatsapp->getQrCodeBase64();
+echo $whatsapp->connect();
 ```
 
 #### Infor Instance
@@ -63,14 +60,14 @@ echo $whatsapp->inforInstance();
 #### Update Webhook
 ```php
 $body = [
-        "allowWebhook" => false,
-        "webhookMessage" => "",
-        "webhookGroup" => "",
-        "webhookConnection" => "",
-        "webhookQrCode" => "", 
-        "webhookMessageFromMe"=>"", 
-        "webhookHistory"=>""
-    ]; 
+"allowWebhook" => false,
+"webhookMessage" => "",
+"webhookGroup" => "",
+"webhookConnection" => "",
+"webhookQrCode" => "", 
+"webhookMessageFromMe"=>"", 
+"webhookHistory"=>""
+]; 
 echo $whatsapp->updateWebhook($body);
 ```
 
@@ -91,6 +88,7 @@ echo $whatsapp->listContacts();
 echo $whatsapp->profilePic('556696852025');
 ```
 
+
 ### Update Profile Name
 ```php
 echo $whatsapp->updateProfileName('Raphael Serafim');
@@ -99,28 +97,18 @@ echo $whatsapp->updateProfileName('Raphael Serafim');
 ### Update Profile And Group  Picture
 ```php
 $url =''; // url image 
-$id  ='556696852025'; // if it's a group, use full id ex: 123456789@g.us 
-echo $whatsapp->updateProfilePicture($id, $url);
-```
-
-### Read Receipt
-```php
-$MsgId ='';  
-$to  ='556696852025'; // if it's a group, use full id ex: 123456789@g.us 
-echo $whatsapp->readReceipt($to, $MsgId);
+echo $whatsapp->updateProfilePicture($url);
 ```
 
 ### Download Media  
 ```php
-  $body = [
-    "messageKeys" => [
-        "mediaKey" => "", 
-        "directPath" => "", 
-        "url" => "", 
-        "messageType" => "" 
-    ] 
-  ];
-echo $whatsapp->downloadMediaMessage($body);
+    $body = [
+    "mediaKey" => "", 
+    "directPath" => "", 
+    "url" => "",
+    ] ;
+$type = "image";// video | audio| image | sticker | document|
+echo $whatsapp->downloadMediaMessage($type, $body);
 ```
 
 ## Send Message
@@ -143,91 +131,56 @@ echo $whatsapp->sendText($to, $text);
  ```php
  $to     = '556696852025'; // if it's a group, use full id ex: 123456789@g.us  
  $url    = ''; // your MP3 or OGG audio URL    
- $ptt    = true;
-echo $whatsapp->sendAudio($to, $url, $ptt  );
+echo $whatsapp->sendAudio($to, $url);
 ```
 
 ###  send Media 
  
-```php 
-$to         = '556696852025'; // if it's a group, use full id ex: 123456789@g.us  
-$url        = '';
-$type       = 'image'; //  image |  video | audio | document
-$caption    = 'Hi';  
-echo $whatsapp->sendMedia($to, $url, $type, $caption);
-```
+ 
  
  ### Send Button
  ```php
-    $body = [
-        "to" => "556696852025",
-        "data" => [
-            "text" => "Recebeu ?",
-            "buttons" => [
-                [
-                    "title" => "Sim",
-                    "id" => "1"
-                ],
-                [
-                    "title" => "Não",
-                    "id" => "2"
-                ]
-            ],
-            "footerText" => "Escolha uma opção"
+   $body = [
+    "to" => "556696852025",
+    "title" => "Are you enjoying ?",
+    "footer" => "choose an option",
+    "buttons" => [
+        [
+            "id" => "click_1",
+            "text" => "Yes"
+        ],
+        [
+            "id" => "click_2",
+            "text" => "No"
         ]
-    ];
+    ]
+];
 echo $whatsapp->sendButton($body);
 ```
 
- ### Send Template Buttons
- ```php
-    $body = [
-        "to" => "556696852025",
-        "data" => [
-            "text" => "Finalizar a compra",
-            "buttons" => [
-                [
-                    "type" => "urlButton", // replyButton | urlButton | callButton 
-                    "title" => "Pagar",
-                    "payload" => "https://api-wa.me"
-                ]
-            ],
-            "footerText" => "Visite o site para finalizar"
-        ]
-    ];
-echo $whatsapp->sendTemplateButtons($body);
-```
- 
 
  ### Send List 
  ```php
-    $body = [
-        "messageData" => [
-            "to" => "556696852025",
-            "buttonText" => "Menu",
-            "text" => "Esse nosso menu",
-            "title" => "Menu",
-            "description" => "veja nosso menu",
-            "sections" => [
+   $body = [
+    "to" => "556696852025",
+    "buttonText" => "Menu",
+    "text" => "string", 
+    "title" => "Menu",
+    "description" => "Description",
+    "footer" => "footer", 
+    "sections" => [
+        [
+            "title" => "Pizza",
+            "rows" => [
                 [
-                    "title" => "Menu 01",
-                    "rows" => [
-                        [
-                            "title" => "Opção 01",
-                            "description" => "essa é uma opção",
-                            "rowId" => "1"
-                        ],
-                        [
-                            "title" => "Opção 02",
-                            "description" => "essa é outra opção",
-                            "rowId" => "2"
-                        ]
-                    ]
+                    "title" => "Pizza 01",
+                    "description" => "Example pizza 01",
+                    "rowId" => "1"
                 ]
-            ],
-            "listType" => 0
+            ]
         ]
-    ];
+    ]
+];
 echo $whatsapp->sendList($body);
 ```
 
@@ -243,9 +196,9 @@ echo $whatsapp->sendContact($to, $name, $number);
 ### send Location
  ```php
  $to     = '556696852025'; // if it's a group, use full id ex: 123456789@g.us  
- $lat    = 35.000;   
- $lon    = 20.000;
- $address = 'Rua do fulando';
+ $lat    =  37.7749;   
+ $lon    =  -122.4194;
+ $address = '123 Main St, San Francisco, CA';
 echo $whatsapp->sendLocation($to, $lat, $lon, $address);
 ```
 
@@ -298,28 +251,8 @@ echo $whatsapp->sendReaction($to, $text, $msgId);
 ```php 
    $group_id     = '123456789@g.us'; 
    $participants = ['556696852025'];
-   echo $whatsapp->promoteParticipantsGroup($group_id, $participants);
-```
-
- ### Demote Participants Group   
-```php 
-   $group_id     = '123456789@g.us'; 
-   $participants = ['556696852025'];
-   echo $whatsapp->demoteParticipantsGroup($group_id, $participants);
-```
-
- ### Set Who Can Send Message Group  
-```php 
-   $group_id     = '123456789@g.us'; 
-   // true = Admin; false= All 
-   echo $whatsapp->setWhoCanSendMessageGroup($group_id, true);
-```
-
- ### Set Who Can Change Settings Group
-```php 
-   $group_id     = '123456789@g.us'; 
-   // true = Admin; false= All 
-   echo $whatsapp->setWhoCanChangeSettingsGroup($group_id, true);
+   $action = "promote"; // demote
+   echo $whatsapp->promoteParticipantsGroup($group_id, $participants, $action);
 ```
 
  ### Remove Participants Group  

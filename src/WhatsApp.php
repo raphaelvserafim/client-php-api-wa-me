@@ -47,117 +47,17 @@ class WhatsApp
     return $result;
   }
 
-
-  /**
-   * Lista todas as instâncias.
-   *
-   * @param string $admin_key A chave de administração para autenticação.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function ListAllInstance(string $admin_key)
-  {
-    // Define o caminho, método e corpo da requisição para listar todas as instâncias.
-    $this->parth = "/instance/list?admin_key={$admin_key}";
-    $this->method = "GET";
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-
-  /**
-   * Cria um novo item usando a chave de administração e a chave fornecidas.
-   *
-   * @param string $admin_key A chave de administração para autenticação.
-   * @param string $key A chave para a operação de criação.
-   * @param mixed $body Os dados a serem enviados no corpo da requisição.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function Create(string $admin_key, string $key, $body)
-  {
-    // Define o caminho, método e corpo da requisição para a criação.
-    $this->parth = "/manager/create?key={$key}&admin_key={$admin_key}";
-    $this->method = "POST";
-    $this->body = json_encode($body);
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-
-  /**
-   * Exclui um item usando a chave de administração e a chave fornecidas.
-   *
-   * @param string $admin_key A chave de administração para autenticação.
-   * @param string $key A chave para a operação de exclusão.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function Delete(string $admin_key, string $key)
-  {
-    // Define o caminho, método e corpo da requisição para a exclusão.
-    $this->parth = "/manager/delete?key={$key}&admin_key={$admin_key}";
-    $this->method = "DELETE";
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-
-  /**
-   * Bloqueia ou desbloqueia um item usando as chaves de administração e a chave fornecidas.
-   *
-   * @param string $admin_key A chave de administração para autenticação.
-   * @param string $key A chave para a operação de bloqueio/desbloqueio.
-   * @param bool $block Um valor booleano indicando se deve bloquear (true) ou desbloquear (false).
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function Block(string $admin_key, string $key, bool $block)
-  {
-    // Define o caminho, método e corpo da requisição para bloqueio/desbloqueio.
-    $this->parth = "/manager/block?key={$key}&admin_key={$admin_key}&block={$block}";
-    $this->method = "PUT";
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-
   /**
    * Obtém o código QR em HTML para a instância atual.
    *
    * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
    * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
    */
-  public function getQrCodeHTML()
+  public function connect()
   {
     // Define o caminho, método e corpo da requisição para obter o código QR em HTML.
-    $this->parth = "/instance/qrcode?key={$this->key}";
-    $this->method = "GET";
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-  /**
-   * Obtém o código QR em formato base64 para a instância atual.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function getQrCodeBase64()
-  {
-    // Define o caminho, método e corpo da requisição para obter o código QR em base64.
-    $this->parth = "/instance/qrcode_base64?key={$this->key}";
-    $this->method = "GET";
-
+    $this->parth = "/instance/{$this->key}";
+    $this->method = "POST";
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -171,9 +71,8 @@ class WhatsApp
   public function inforInstance()
   {
     // Define o caminho, método e corpo da requisição para obter informações sobre a instância.
-    $this->parth = "/instance/info?key={$this->key}";
+    $this->parth = "/instance/{$this->key}";
     $this->method = "GET";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -190,10 +89,9 @@ class WhatsApp
   public function updateWebhook($body)
   {
     // Define o caminho, método e corpo da requisição para atualizar o webhook.
-    $this->parth = "/instance/updateWebhook?key={$this->key}";
-    $this->method = "POST";
+    $this->parth = "/instance/{$this->key}";
+    $this->method = "PUT";
     $this->body = json_encode($body);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -207,7 +105,7 @@ class WhatsApp
   public function logout()
   {
     // Define o caminho, método e corpo da requisição para efetuar o logout.
-    $this->parth = "/instance/logout?key={$this->key}";
+    $this->parth = "/instance/{$this->key}";
     $this->method = "DELETE";
 
     // Executa a requisição e retorna o resultado.
@@ -224,9 +122,8 @@ class WhatsApp
   public function listContacts()
   {
     // Define o caminho, método e corpo da requisição para listar os contatos.
-    $this->parth = "/actions/contacts?key={$this->key}";
+    $this->parth = "/{$this->key}/contacts";
     $this->method = "GET";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -242,9 +139,8 @@ class WhatsApp
   public function profilePic(string $to)
   {
     // Define o caminho, método e corpo da requisição para obter a imagem do perfil.
-    $this->parth = "/actions/getPicture?key={$this->key}&to={$to}";
+    $this->parth = "/{$this->key}/contacts/{$to}";
     $this->method = "GET";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -260,14 +156,12 @@ class WhatsApp
   public function updateProfileName(string $name)
   {
     // Define o caminho, método e corpo da requisição para atualizar o nome do perfil.
-    $this->parth = "/actions/updateProfileName?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode(["name" => $name]);
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
+    // $this->parth = "/actions/updateProfileName?key={$this->key}";
+    // $this->method = "POST";
+    // $this->body = json_encode(["name" => $name]);
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
   }
-
 
 
   /**
@@ -279,18 +173,15 @@ class WhatsApp
    * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
    * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
    */
-  public function updateProfilePicture($to, string $url)
+  public function updateProfilePicture(string $url)
   {
     // Define o caminho, método e corpo da requisição para atualizar a imagem do perfil.
-    $this->parth = "/actions/updateProfilePicture?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode(["to" => $to, "url" => $url]);
-
+    $this->parth = "/{$this->key}/actions/picture";
+    $this->method = "PUT";
+    $this->body = json_encode(["url" => $url]);
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
-
-
 
   /**
    * Envia um recibo de leitura para uma mensagem específica.
@@ -304,13 +195,13 @@ class WhatsApp
   public function readReceipt(string $to, string $MsgId)
   {
     // Define o corpo da requisição para enviar um recibo de leitura.
-    $body = ["to" => $to, "idMsg" => $MsgId];
-    $this->parth = "/actions/readReceipt?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode($body);
+    // $body = ["to" => $to, "idMsg" => $MsgId];
+    // $this->parth = "/actions/readReceipt?key={$this->key}";
+    // $this->method = "POST";
+    // $this->body = json_encode($body);
 
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
   }
 
 
@@ -322,13 +213,12 @@ class WhatsApp
    * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
    * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
    */
-  public function downloadMediaMessage($body)
+  public function downloadMediaMessage($type, $body)
   {
     // Define o caminho, método e corpo da requisição para baixar um arquivo de mídia.
-    $this->parth = "/actions/downloadMediaMessage?key={$this->key}";
+    $this->parth = "/{$this->key}/actions/download/media?type=" . $type;
     $this->method = "POST";
     $this->body = json_encode($body);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -346,15 +236,12 @@ class WhatsApp
   public function sendPresence(string $to, string $status)
   {
     // Define o corpo da requisição para enviar um status de presença.
-    $this->parth = "/message/setstatus?key={$this->key}";
+    $this->parth = "/{$this->key}/message/presence";
     $this->method = "POST";
     $this->body = json_encode([
-      "data" => [
-        "to" => $to,
-        "status" => $status
-      ]
+      "to" => $to,
+      "status" => $status
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -371,15 +258,12 @@ class WhatsApp
   public function sendText(string $to, string $text)
   {
     // Define o corpo da requisição para enviar uma mensagem de texto.
-    $this->parth = "/message/text?key={$this->key}";
+    $this->parth = "/{$this->key}/message/text";
     $this->method = "POST";
     $this->body = json_encode([
-      "messageData" => [
-        "to" => $to,
-        "text" => $text
-      ]
+      "to" => $to,
+      "text" => $text
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -397,15 +281,12 @@ class WhatsApp
   public function sendAudio(string $to, string $url, bool $ptt = true)
   {
     // Define o corpo da requisição para enviar uma mensagem de áudio.
-    $this->parth = "/message/audio?key={$this->key}&ptt={$ptt}";
+    $this->parth = "/{$this->key}/message/audio";
     $this->method = "POST";
     $this->body = json_encode([
-      "messageData" => [
-        "to" => $to,
-        "url" => $url
-      ]
+      "to" => $to,
+      "url" => $url
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -453,16 +334,13 @@ class WhatsApp
   public function sendSurvey(string $to, string $name, array $options)
   {
     // Define o caminho, método e corpo da requisição para enviar uma mensagem de pesquisa.
-    $this->parth = "/message/survey?key={$this->key}";
+    $this->parth = "/{$this->key}/message/survey";
     $this->method = "POST";
     $this->body = json_encode([
-      "data" => [
-        "to" => $to,
-        "name" => $name,
-        "options" => $options
-      ]
+      "to" => $to,
+      "name" => $name,
+      "options" => $options
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -482,20 +360,19 @@ class WhatsApp
    */
   public function replyToMessage(string $to, string $text, string $messageId, array $msgContent = [])
   {
-    // Define o caminho, método e corpo da requisição para responder a uma mensagem.
-    $this->parth = "/message/replymessage?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode([
-      "messageData" => [
-        "to" => $to,
-        "text" => $text,
-        "messageId" => $messageId,
-        "msgContent" => $msgContent
-      ]
-    ]);
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
+    // // Define o caminho, método e corpo da requisição para responder a uma mensagem.
+    // $this->parth = "/message/replymessage?key={$this->key}";
+    // $this->method = "POST";
+    // $this->body = json_encode([
+    //   "messageData" => [
+    //     "to" => $to,
+    //     "text" => $text,
+    //     "messageId" => $messageId,
+    //     "msgContent" => $msgContent
+    //   ]
+    // ]);
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
   }
 
 
@@ -512,18 +389,18 @@ class WhatsApp
   public function sendTextWithMentions(string $groupId, string $text, array $mentions)
   {
     // Define o caminho, método e corpo da requisição para enviar uma mensagem de texto com menções.
-    $this->parth = "/message/textMentions?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode([
-      "data" => [
-        "group_id" => $groupId,
-        "text" => $text,
-        "mentions" => $mentions
-      ]
-    ]);
+    // $this->parth = "/message/textMentions?key={$this->key}";
+    // $this->method = "POST";
+    // $this->body = json_encode([
+    //   "data" => [
+    //     "group_id" => $groupId,
+    //     "text" => $text,
+    //     "mentions" => $mentions
+    //   ]
+    // ]);
 
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
   }
 
 
@@ -571,10 +448,9 @@ class WhatsApp
   public function sendButton($body)
   {
     // Define o corpo da requisição para enviar uma mensagem com botões.
-    $this->parth = "/message/button?key={$this->key}";
+    $this->parth = "/{$this->key}/message/button";
     $this->method = "POST";
     $this->body = json_encode($body);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -590,12 +466,12 @@ class WhatsApp
   public function sendTemplateButtons($body)
   {
     // Define o corpo da requisição para enviar uma mensagem com botões de modelo.
-    $this->parth = "/message/templateButtons?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode($body);
+    // $this->parth = "/message/templateButtons?key={$this->key}";
+    // $this->method = "POST";
+    // $this->body = json_encode($body);
 
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
   }
 
   /**
@@ -609,10 +485,9 @@ class WhatsApp
   public function sendList($body)
   {
     // Define o corpo da requisição para enviar uma lista.
-    $this->parth = "/message/list?key={$this->key}";
+    $this->parth = "/{$this->key}/message/list";
     $this->method = "POST";
     $this->body = json_encode($body);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -630,18 +505,16 @@ class WhatsApp
   public function sendContact(string $to, string $name, string $number)
   {
     // Define o corpo da requisição para enviar um cartão de contato.
-    $this->parth = "/message/contact?key={$this->key}";
+    $this->parth = "/{$this->key}/message/contact";
     $this->method = "POST";
     $this->body = json_encode([
       "to" => $to,
-      "vcard" => [
+      "contact" => [
         "fullName" => $name,
-        "displayName" => $name,
         "organization" => "",
         "phoneNumber" => $number
       ]
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -660,19 +533,16 @@ class WhatsApp
   public function sendLocation(string $to, float $lat, float $lon, string $address)
   {
     // Define o corpo da requisição para enviar uma localização.
-    $this->parth = "/message/location?key={$this->key}";
+    $this->parth = "/{$this->key}/message/location";
     $this->method = "POST";
     $this->body = json_encode([
-      "data" => [
-        "to" => $to,
-        "location" => [
-          "latitude" => $lat,
-          "longitude" => $lon,
-          "address" => $address
-        ]
+      "to" => $to,
+      "location" => [
+        "latitude" => $lat,
+        "longitude" => $lon,
+        "address" => $address
       ]
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -688,19 +558,16 @@ class WhatsApp
    * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
    * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
    */
-  public function sendReaction(string $to, string $text, string $MsgId)
+  public function sendReaction(string $to, string $text, string $msgId)
   {
     // Define o corpo da requisição para enviar uma reação.
-    $this->parth = "/message/reaction?key={$this->key}";
+    $this->parth = "/{$this->key}/message/reaction";
     $this->method = "POST";
     $this->body = json_encode([
-      "data" => [
-        "to" => $to,
-        "text" => $text,
-        "MsgId" => $MsgId
-      ]
+      "to" => $to,
+      "text" => $text,
+      "msgId" => $msgId
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -715,9 +582,8 @@ class WhatsApp
   public function listGroup()
   {
     // Define o caminho, método e corpo da requisição para listar todos os grupos.
-    $this->parth = "/group/list?key={$this->key}";
+    $this->parth = "/{$this->key}/groups";
     $this->method = "GET";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -733,9 +599,8 @@ class WhatsApp
   public function inforGroup(string $group_id)
   {
     // Define o caminho, método e corpo da requisição para obter informações sobre um grupo.
-    $this->parth = "/group/infor?key={$this->key}&group_id={$group_id}";
+    $this->parth = "/{$this->key}/groups/{$group_id}";
     $this->method = "GET";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -751,9 +616,8 @@ class WhatsApp
   public function groupInviteCode(string $group_id)
   {
     // Define o caminho, método e corpo da requisição para obter o código de convite de um grupo.
-    $this->parth = "/group/groupInviteCode?key={$this->key}&group_id={$group_id}";
+    $this->parth = "/{$this->key}/groups/{$group_id}/invite";
     $this->method = "GET";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -770,19 +634,15 @@ class WhatsApp
   public function createGroup(string $name, array $participants)
   {
     // Define o corpo da requisição para criar um novo grupo.
-    $this->parth = "/group/create?key={$this->key}";
+    $this->parth = "/{$this->key}/groups";
     $this->method = "POST";
     $this->body = json_encode([
-      "group_data" => [
-        "group_name" => $name,
-        "participants" => $participants
-      ]
+      "name" => $name,
+      "participants" => $participants
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
-
 
   /**
    * Adiciona participantes a um grupo existente.
@@ -796,104 +656,11 @@ class WhatsApp
   public function addParticipantsGroup(string $group_id, array $participants)
   {
     // Define o corpo da requisição para adicionar participantes a um grupo existente.
-    $this->parth = "/group/addParticipants?key={$this->key}";
+    $this->parth = "/{$this->key}/groups/{$group_id}/participants";
     $this->method = "POST";
     $this->body = json_encode([
-      "group_data" => [
-        "group_id" => $group_id,
-        "participants" => $participants
-      ]
+      "participants" => $participants
     ]);
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-
-  /**
-   * Promove participantes a administradores em um grupo existente.
-   *
-   * @param string $group_id O identificador do grupo.
-   * @param array $participants Um array contendo os identificadores dos participantes a serem promovidos.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function promoteParticipantsGroup(string $group_id, array $participants)
-  {
-    // Define o corpo da requisição para promover participantes a administradores em um grupo existente.
-    $this->parth = "/group/promoteParticipants?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode([
-      "group_data" => [
-        "group_id" => $group_id,
-        "participants" => $participants
-      ]
-    ]);
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-  /**
-   * Rebaixa participantes de administradores em um grupo existente.
-   *
-   * @param string $group_id O identificador do grupo.
-   * @param array $participants Um array contendo os identificadores dos participantes a serem rebaixados.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function demoteParticipantsGroup(string $group_id, array $participants)
-  {
-    // Define o corpo da requisição para rebaixar participantes de administradores em um grupo existente.
-    $this->parth = "/group/demoteParticipants?key={$this->key}";
-    $this->method = "POST";
-    $this->body = json_encode([
-      "group_data" => [
-        "group_id" => $group_id,
-        "participants" => $participants
-      ]
-    ]);
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-  /**
-   * Define quem pode enviar mensagens em um grupo específico.
-   *
-   * @param string $group_id O identificador do grupo.
-   * @param bool $allow Indica se apenas administradores podem enviar mensagens no grupo.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function setWhoCanSendMessageGroup(string $group_id, bool $allow)
-  {
-    // Define o corpo da requisição para definir quem pode enviar mensagens em um grupo específico.
-    $this->parth = "/group/setWhoCanSendMessage?key={$this->key}&group_id={$group_id}&allowOnlyAdmins=" . $allow;
-    $this->method = "POST";
-
-    // Executa a requisição e retorna o resultado.
-    return $this->request();
-  }
-
-  /**
-   * Define quem pode alterar configurações em um grupo específico.
-   *
-   * @param string $group_id O identificador do grupo.
-   * @param bool $allow Indica se apenas administradores podem alterar configurações no grupo.
-   *
-   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
-   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
-   */
-  public function setWhoCanChangeSettingsGroup(string $group_id, bool $allow)
-  {
-    // Define o corpo da requisição para definir quem pode alterar configurações em um grupo específico.
-    $this->parth = "/group/setWhoCanChangeSettings?key={$this->key}&group_id={$group_id}&allowOnlyAdmins=" . $allow;
-    $this->method = "POST";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -910,15 +677,11 @@ class WhatsApp
   public function removeParticipantsGroup(string $group_id, array $participants)
   {
     // Define o corpo da requisição para remover participantes de um grupo existente.
-    $this->parth = "/group/removeParticipants?key={$this->key}";
+    $this->parth = "/{$this->key}/groups/{$group_id}/participants";
     $this->method = "DELETE";
     $this->body = json_encode([
-      "group_data" => [
-        "group_id" => $group_id,
-        "participants" => $participants
-      ]
+      "participants" => $participants
     ]);
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
@@ -934,12 +697,69 @@ class WhatsApp
   public function leaveGroup(string $group_id)
   {
     // Define o caminho, método e corpo da requisição para deixar um grupo existente.
-    $this->parth = "/group/leaveGroup?key={$this->key}&group_id={$group_id}";
+    $this->parth = "/{$this->key}/groups/{$group_id}";
     $this->method = "DELETE";
-
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
+
+  /**
+   * Promove participantes a administradores em um grupo existente.
+   *
+   * @param string $group_id O identificador do grupo.
+   * @param array $participants Um array contendo os identificadores dos participantes a serem promovidos.
+   *
+   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
+   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
+   */
+  public function promoteParticipantsGroup(string $group_id, array $participants, string $action)
+  {
+    // Define o corpo da requisição para promover participantes a administradores em um grupo existente.
+    $this->parth = "/{$this->key}/groups/{$group_id}/role?action={$action}";
+    $this->method = "POST";
+    $this->body = json_encode(["participants" => $participants]);
+    // Executa a requisição e retorna o resultado.
+    return $this->request();
+  }
+
+  /**
+   * Define quem pode enviar mensagens em um grupo específico.
+   *
+   * @param string $group_id O identificador do grupo.
+   * @param bool $allow Indica se apenas administradores podem enviar mensagens no grupo.
+   *
+   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
+   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
+   */
+  public function setWhoCanSendMessageGroup(string $group_id, bool $allow)
+  {
+    // Define o corpo da requisição para definir quem pode enviar mensagens em um grupo específico.
+    // $this->parth = "/group/setWhoCanSendMessage?key={$this->key}&group_id={$group_id}&allowOnlyAdmins=" . $allow;
+    // $this->method = "POST";
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
+  }
+
+  /**
+   * Define quem pode alterar configurações em um grupo específico.
+   *
+   * @param string $group_id O identificador do grupo.
+   * @param bool $allow Indica se apenas administradores podem alterar configurações no grupo.
+   *
+   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
+   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
+   */
+  public function setWhoCanChangeSettingsGroup(string $group_id, bool $allow)
+  {
+    // Define o corpo da requisição para definir quem pode alterar configurações em um grupo específico.
+    // $this->parth = "/group/setWhoCanChangeSettings?key={$this->key}&group_id={$group_id}&allowOnlyAdmins=" . $allow;
+    // $this->method = "POST";
+    // // Executa a requisição e retorna o resultado.
+    // return $this->request();
+  }
+
+
+
 
   public function constructWebhook()
   {
@@ -951,7 +771,7 @@ class WhatsApp
     if (!empty($data)) {
 
       $this->from = new stdClass();
-      
+
       if (isset($data["data"]["key"]["remoteJid"])) {
         $this->from->remoteJid = preg_replace("/[^0-9]/", "", $data["data"]["key"]["remoteJid"]);
       }
@@ -1089,10 +909,9 @@ class WhatsApp
           ]
         ];
 
-        if ($this->from->messageType !== "video") {
-          $dow = json_decode($this->downloadMediaMessage($this->from->messageKeys), true);
-          $this->from->mediaBase64 = $dow["data"] ?? "";
-        }
+        $this->from->mediaBase64 = $data["data"]["fileBase64"];
+        $this->from->mediaURL = $data["data"]["urlMedia"];
+
         if (isset($data["data"]["msgContent"][$data["data"]["messageType"]]["title"])) {
           $this->from->title = $data["data"]["msgContent"][$data["data"]["messageType"]]["title"];
         }
