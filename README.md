@@ -1,12 +1,32 @@
-# WhatsApp API - PHP
+# WhatsApp API
 
-##### Gerar Instância Key:
- 
-Acessar: <a href="https://api-wa.me">api-wa.me</a>
+## About Our WhatsApp API
 
-<a href="https://doc.api-wa.me/">Swagger</a>
+🔓 **Unlock the Potential of WhatsApp:** Powerful Integration with Our Unofficial API!
 
-<a href="https://documenter.getpostman.com/view/27660901/2sA3Qs9s7K/">Postman</a>
+### Efficient Group Management on WhatsApp
+
+📋 Our stable, though unofficial, API allows for efficient management of WhatsApp groups. Simplify administration, and easily add or remove members.
+
+### Versatile Message Sending
+
+💬 With our API, you can send text, audio, video, and image messages quickly and easily. Adapt to your business communication needs comprehensively.
+
+### Receive Instant Events
+
+🔔 Stay updated with our API, receiving real-time events when new messages are received. Stay connected and agile in responding to interactions on WhatsApp.
+
+🔗 **Create Your Account:** Visit [https://api-wa.me/sign-up](https://api-wa.me/sign-up) to create your account and start using our API today!
+
+🎁 **Special Discount:** Use the coupon **GIT20** and get 20% off on your first instance!
+
+## Contact Support
+
+- **Name:** Raphael Serafim
+- **Email:** [support@api-wa.me](mailto:support@api-wa.me)
+- **Website:** [https://api-wa.me](https://api-wa.me)
+
+
 
 ## Installing via composer
 
