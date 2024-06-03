@@ -4,13 +4,14 @@
   "type": "library",
   "homepage": "https://github.com/raphaelvserafim/client-php-api-wa-me",
   "license": "MIT",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "autoload": {
     "psr-4": {
       "Api\\Wame\\": "src/"
     }
   },
   "require": {
-    "php": "^7.2",
     "ext-curl": "*"
   },
   "authors": [
