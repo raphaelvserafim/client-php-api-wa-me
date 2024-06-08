@@ -166,12 +166,22 @@ echo $whatsapp->sendAudio($to, $url);
     "footer" => "choose an option",
     "buttons" => [
         [
+            "type"=> "quick_reply",
             "id" => "click_1",
             "text" => "Yes"
         ],
         [
-            "id" => "click_2",
-            "text" => "No"
+            "type"=> "cta_copy",
+            "copy_code" => "000000000000",
+            "text" => "Copy barcode"
+        ],
+        [
+            "type"=> "cta_url",
+            "url" => "https://api-wa.me",
+            "text" => "Access the website"
+        ],
+        [
+            "type"=> "send_location"
         ]
     ]
 ];
