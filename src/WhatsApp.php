@@ -1,4 +1,5 @@
 <?php
+
 namespace Api\Wame;
 
 use stdClass;
@@ -420,22 +421,64 @@ class WhatsApp
   public function sendMedia(string $to, string $url, string $type, string $caption, string $mimeType = '', bool $ptt = false)
   {
     // Define o corpo da requisição para enviar uma mensagem de mídia.
-    $this->parth = "/message/media?key={$this->key}";
+    // $this->parth = "/message/media?key={$this->key}";
+    // $this->method = "POST";
+    // $this->body = json_encode([
+    //   "data" => [
+    //     "to" => $to,
+    //     "url" => $url,
+    //     "type" => $type,
+    //     "caption" => $caption,
+    //     "mimeType" => $mimeType,
+    //     "ptt" => $ptt
+    //   ]
+    // ]);
+    // Executa a requisição e retorna o resultado.
+    //return $this->request();
+  }
+
+
+  public function sendImage(string $to, string $url, string $caption)
+  {
+    // Define o corpo da requisição para enviar uma mensagem de mídia.
+    $this->parth = "/{$this->key}/message/image";
     $this->method = "POST";
     $this->body = json_encode([
-      "data" => [
-        "to" => $to,
-        "url" => $url,
-        "type" => $type,
-        "caption" => $caption,
-        "mimeType" => $mimeType,
-        "ptt" => $ptt
-      ]
+      "to" => $to,
+      "url" => $url,
+      "caption" => $caption,
     ]);
-
-    // Executa a requisição e retorna o resultado.
     return $this->request();
   }
+
+  public function sendVideo(string $to, string $url, string $caption)
+  {
+    // Define o corpo da requisição para enviar uma mensagem de mídia.
+    $this->parth = "/{$this->key}/message/video";
+    $this->method = "POST";
+    $this->body = json_encode([
+      "to" => $to,
+      "url" => $url,
+      "caption" => $caption,
+    ]);
+    return $this->request();
+  }
+
+  public function sendDocument(string $to, string $url, string $caption, string $mimetype,  $fileName)
+  {
+    // Define o corpo da requisição para enviar uma mensagem de mídia.
+    $this->parth = "/{$this->key}/message/document";
+    $this->method = "POST";
+    $this->body = json_encode([
+      "to" => $to,
+      "url" => $url,
+      "caption" => $caption,
+      "mimetype" => $mimetype,
+      "fileName" => $fileName,
+    ]);
+    return $this->request();
+  }
+
 
   /**
    * Envia uma mensagem com botões para um destinatário.
@@ -926,5 +969,4 @@ class WhatsApp
       }
     }
   }
-
 }

@@ -120,17 +120,7 @@ $url =''; // url image
 echo $whatsapp->updateProfilePicture($url);
 ```
 
-### Download Media  
-```php
-    $body = [
-    "mediaKey" => "", 
-    "directPath" => "", 
-    "url" => "",
-    ] ;
-$type = "image";// video | audio| image | sticker | document|
-echo $whatsapp->downloadMediaMessage($type, $body);
-```
-
+ 
 ## Send Message
 
 ### send Presence
@@ -154,9 +144,34 @@ echo $whatsapp->sendText($to, $text);
 echo $whatsapp->sendAudio($to, $url);
 ```
 
-###  send Media 
+###  send Image 
+ ```php
+ $to     = '556696852025'; // if it's a group, use full id ex: 123456789@g.us  
+ $url    = '';  
+ $caption = '';
+echo $whatsapp->sendImage($to, $url);
+```
  
+ ###  send Video 
+ ```php
+ $to     = '556696852025'; // if it's a group, use full id ex: 123456789@g.us  
+ $url    = '';  
+ $caption = '';
+echo $whatsapp->sendVideo($to, $url);
+```
+
+
  
+ ###  send Document 
+ ```php
+$to     = '556696852025'; // if it's a group, use full id ex: 123456789@g.us  
+$url    = '';  
+$caption = '';
+$mimetype = 'application/pdf'; // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types 
+$fileName='';
+echo $whatsapp->sendDocument($to, $url, $mimetype, $fileName);
+```
+
  
  ### Send Button
  ```php
