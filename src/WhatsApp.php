@@ -31,7 +31,7 @@ class WhatsApp
     curl_setopt($ch, CURLOPT_URL, $this->server . $this->parth);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
-    if ($this->method === 'POST') {
+    if ($this->method === 'POST' || $this->method === 'PUT') {
       curl_setopt($ch, CURLOPT_POST, true);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
     }
