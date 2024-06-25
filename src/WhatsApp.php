@@ -57,7 +57,7 @@ class WhatsApp
   public function connect()
   {
     // Define o caminho, método e corpo da requisição para obter o código QR em HTML.
-    $this->parth = "{$this->key}/instance";
+    $this->parth = "/{$this->key}/instance";
     $this->method = "POST";
     // Executa a requisição e retorna o resultado.
     return $this->request();
@@ -72,7 +72,7 @@ class WhatsApp
   public function inforInstance()
   {
     // Define o caminho, método e corpo da requisição para obter informações sobre a instância.
-    $this->parth = "{$this->key}/instance";
+    $this->parth = "/{$this->key}/instance";
     $this->method = "GET";
     // Executa a requisição e retorna o resultado.
     return $this->request();
@@ -90,7 +90,7 @@ class WhatsApp
   public function updateWebhook($body)
   {
     // Define o caminho, método e corpo da requisição para atualizar o webhook.
-    $this->parth = "{$this->key}/instance";
+    $this->parth = "/{$this->key}/instance";
     $this->method = "PUT";
     $this->body = json_encode($body);
     // Executa a requisição e retorna o resultado.
@@ -106,7 +106,7 @@ class WhatsApp
   public function logout()
   {
     // Define o caminho, método e corpo da requisição para efetuar o logout.
-    $this->parth = "{$this->key}/instance";
+    $this->parth = "/{$this->key}/instance";
     $this->method = "DELETE";
 
     // Executa a requisição e retorna o resultado.
