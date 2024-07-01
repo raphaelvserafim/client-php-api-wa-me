@@ -80,7 +80,7 @@ echo $whatsapp->inforInstance();
 #### Update Webhook
 ```php
 $body = [
-"allowWebhook" => false,
+"allowWebhook" => 1, // 1=true or 0=false
 "webhookMessage" => "",
 "webhookGroup" => "",
 "webhookConnection" => "",
