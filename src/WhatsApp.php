@@ -26,26 +26,28 @@ class WhatsApp
 
   private function request()
   {
-    $this->header[] = 'Content-Type: application/json';
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $this->server . $this->parth);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
-    if ($this->method === 'POST' || $this->method === 'PUT') {
-      curl_setopt($ch, CURLOPT_POST, true);
-      curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
-    }
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $this->header);
-    $result = curl_exec($ch);
-
-    if (curl_errno($ch)) {
-      $errorMessage = curl_error($ch);
+    try {
+      $this->header[] = 'Content-Type: application/json';
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, $this->server . $this->parth);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
+      if ($this->method === 'POST' || $this->method === 'PUT') {
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
+      }
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $this->header);
+      $result = curl_exec($ch);
+      if (curl_errno($ch)) {
+        $errorMessage = curl_error($ch);
+        curl_close($ch);
+        throw new \RuntimeException("cURL Error: $errorMessage");
+      }
       curl_close($ch);
-      throw new \RuntimeException("cURL Error: $errorMessage");
+      return $result;
+    } catch (\Throwable $th) {
+      return null;
     }
-    curl_close($ch);
-    return $result;
   }
 
   /**
@@ -60,6 +62,15 @@ class WhatsApp
     $this->parth = "/{$this->key}/instance";
     $this->method = "POST";
     // Executa a requisição e retorna o resultado.
+    return $this->request();
+  }
+
+  public function updateSaveMediaMarkMessageRead(bool $markMessageRead, bool $saveMedia)
+  {
+    $markMessageReadValue = json_encode($markMessageRead);
+    $saveMediaValue = json_encode($saveMedia);
+    $this->parth = "/{$this->key}/instance/?markMessageRead={$markMessageReadValue}&saveMedia={$saveMediaValue}";
+    $this->method = "PATCH";
     return $this->request();
   }
 
