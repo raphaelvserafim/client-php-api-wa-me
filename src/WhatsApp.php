@@ -475,7 +475,7 @@ class WhatsApp
     return $this->request();
   }
 
-  public function sendDocument(string $to, string $url, string $caption, string $mimetype,  $fileName)
+  public function sendDocument(string $to, string $url, string $caption, string $mimetype, $fileName)
   {
     // Define o corpo da requisição para enviar uma mensagem de mídia.
     $this->parth = "/{$this->key}/message/document";
@@ -501,13 +501,36 @@ class WhatsApp
    */
   public function sendButton($body)
   {
+
     // Define o corpo da requisição para enviar uma mensagem com botões.
-    $this->parth = "/{$this->key}/message/button";
+    $this->parth = "/{$this->key}/message/button_action";
     $this->method = "POST";
     $this->body = json_encode($body);
     // Executa a requisição e retorna o resultado.
     return $this->request();
   }
+
+
+  /**
+   * Envia uma resposta a um botão pressionado por um destinatário.
+   *
+   * @param mixed $body Os dados a serem enviados no corpo da requisição.
+   *
+   * @return mixed A resposta da requisição ou uma mensagem de erro em caso de falha.
+   * @throws \RuntimeException Se ocorrer um erro durante a requisição cURL.
+   */
+  public function sendButtonReply($body)
+  {
+
+    // Define o corpo da requisição para enviar uma mensagem com botões.
+    $this->parth = "/{$this->key}/message/button_reply";
+    $this->method = "POST";
+    $this->body = json_encode($body);
+    // Executa a requisição e retorna o resultado.
+    return $this->request();
+  }
+
+
 
   /**
    * Envia uma mensagem com botões de modelo para um destinatário.

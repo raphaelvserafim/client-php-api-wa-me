@@ -173,34 +173,67 @@ echo $whatsapp->sendDocument($to, $url, $mimetype, $fileName);
 ```
 
  
- ### Send Button
+ ### Send Button Action
  ```php
    $body = [
-    "to" => "556696852025",
-    "title" => "Are you enjoying ?",
-    "footer" => "choose an option",
-    "buttons" => [
-        [
-            "type"=> "quick_reply",
-            "id" => "click_1",
-            "text" => "Yes"
-        ],
-        [
-            "type"=> "cta_copy",
-            "copy_code" => "000000000000",
-            "text" => "Copy barcode"
-        ],
-        [
-            "type"=> "cta_url",
-            "url" => "https://api-wa.me",
-            "text" => "Access the website"
-        ],
-        [
-            "type"=> "send_location"
+      'to' => '14375223417',
+      'header' => [
+        'title' => 'Example Title',
+        'hasMediaAttachment' => true,
+        'imageMessage' => [
+          'url' => 'https://raphaelvserafim.com/og-image.png'
         ]
-    ]
-];
+      ],
+      'text' => 'This is a test',
+      'footer' => 'choose an option',
+      'buttons' => [
+        [
+          'type' => 'cta_copy',
+          'copy_code' => '1234567890',
+          'text' => 'Copy barcode'
+        ],
+        [
+          'type' => 'cta_url',
+          'url' => 'https://api-wa.me',
+          'text' => 'Access the website'
+        ],
+        [
+          'type' => 'cta_call',
+          'phone_number' => '+14375223417',
+          'text' => 'Call us'
+        ]
+      ]
+    ];
 echo $whatsapp->sendButton($body);
+```
+
+ ### Send Button Reply
+ ```php
+   {
+  "to": "14375223417",
+  "header": {
+    "title": "Example Header",
+    "hasMediaAttachment": true,
+    "imageMessage": {
+      "url": "https://raphaelvserafim.com/og-image.png"
+    }
+  },
+  "text": "This is a test",
+  "footer": "choose an option",
+  "buttons": [
+    {
+      "type": "quick_reply",
+      "id": "uniqId1",
+      "text": "Yes"
+    },
+    {
+      "type": "quick_reply",
+      "id": "uniqId2",
+      "text": "No"
+    }
+  ]
+}
+echo $whatsapp->sendButtonReply($body);
 ```
 
 
