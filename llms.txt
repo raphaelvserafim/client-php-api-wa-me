@@ -1,0 +1,2337 @@
+# PHP Client for api-wa.me - WhatsApp API
+
+PHP client library for integrating with the api-wa.me WhatsApp API.
+Send and receive messages, manage contacts, groups, communities, newsletters, labels, business catalog, status/stories, and calls.
+
+## Requirements
+
+- PHP >= 8.1
+- ext-curl
+
+## Installation
+
+```bash
+composer require raphaelvserafim/client-php-api-wa-me
+```
+
+## Quick Start
+
+```php
+use Api\Wame\WhatsApp;
+
+require 'vendor/autoload.php';
+
+$wa = new WhatsApp([
+    'server' => 'https://server.api-wa.me',
+    'key'    => 'YOUR_INSTANCE_KEY',
+]);
+
+$wa->message->sendText('5511999999999', 'Hello!');
+```
+
+## Architecture
+
+The WhatsApp class is a facade that exposes domain-specific modules as public properties:
+
+| Property | Description |
+|----------|-------------|
+| $wa->instance | Connection, settings, profile, proxy, mobile registration |
+| $wa->message | Send and reply to all message types |
+| $wa->chat | Chat management, message history, privacy settings |
+| $wa->contact | Contact CRUD, block/unblock, registration check |
+| $wa->group | Group CRUD, members, roles, invites, settings |
+| $wa->community | Community CRUD, settings, invites, sub-groups |
+| $wa->label | Label CRUD, assign to chats |
+| $wa->newsletter | Newsletter CRUD, follow, messages, reactions |
+| $wa->business | Product catalog management |
+| $wa->status | Status/Stories publishing |
+| $wa->call | Make, accept, reject, end calls |
+| $wa->webhook | Parse incoming webhook payloads |
+
+## Instance
+
+### `getInfo`
+
+```php
+$wa->instance->getInfo(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `connect`
+
+```php
+$wa->instance->connect(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `connectPairingCode`
+
+```php
+$wa->instance->connectPairingCode(string $phoneNumber): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $phoneNumber | string | Yes | Phone number of the contact |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateSettings`
+
+```php
+$wa->instance->updateSettings(bool $markMessageRead, bool $saveMedia, bool $receiveStatusMessage = false, bool $receivePresence = false): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $markMessageRead | bool | Yes | Auto-mark messages as read |
+| $saveMedia | bool | Yes | Auto-save media files |
+| $receiveStatusMessage | bool | No | Receive status/story messages (default: false) |
+| $receivePresence | bool | No | Receive presence updates (default: false) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateWebhook`
+
+```php
+$wa->instance->updateWebhook(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `logout`
+
+```php
+$wa->instance->logout(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `addMongoDB`
+
+```php
+$wa->instance->addMongoDB(string $uri, string $dbName): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $uri | string | Yes | MongoDB connection URI |
+| $dbName | string | Yes | Database name |
+
+**Returns:** `?string` - JSON response from the API
+
+### `setProxy`
+
+```php
+$wa->instance->setProxy(string $proxy): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $proxy | string | Yes | Proxy URL (e.g. "http://user:pass@ip:port") |
+
+**Returns:** `?string` - JSON response from the API
+
+### `resync`
+
+```php
+$wa->instance->resync(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `restart`
+
+```php
+$wa->instance->restart(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateProfileStatus`
+
+```php
+$wa->instance->updateProfileStatus(string $text): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $text | string | Yes | Text content of the message |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateProfilePicture`
+
+```php
+$wa->instance->updateProfilePicture(string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `removeProfilePicture`
+
+```php
+$wa->instance->removeProfilePicture(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateProfileName`
+
+```php
+$wa->instance->updateProfileName(string $name): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $name | string | Yes | Name |
+
+**Returns:** `?string` - JSON response from the API
+
+### `prepareMobileRegistration`
+
+```php
+$wa->instance->prepareMobileRegistration(string $countryCode, string $nationalNumber, string $networkCode): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $countryCode | string | Yes | Country code (e.g. "55") |
+| $nationalNumber | string | Yes | National phone number (e.g. "11999999999") |
+| $networkCode | string | Yes | Mobile network code (e.g. "11") |
+
+**Returns:** `?string` - JSON response from the API
+
+### `requestMobileCode`
+
+```php
+$wa->instance->requestMobileCode(string $method = 'sms'): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $method | string | No | Verification method: "sms" or "voice" (default: 'sms') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `verifyMobileCode`
+
+```php
+$wa->instance->verifyMobileCode(string $code): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $code | string | Yes | Invite or verification code |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getWebhookStatistics`
+
+```php
+$wa->instance->getWebhookStatistics(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+## Message
+
+### `sendPresence`
+
+```php
+$wa->message->sendPresence(string $to, string $status): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $status | string | Yes | Presence status: unavailable, available, composing, recording, paused |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendText`
+
+```php
+$wa->message->sendText(string $to, string $text): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $text | string | Yes | Text content of the message |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendButtonReply`
+
+```php
+$wa->message->sendButtonReply(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendButtonAction`
+
+```php
+$wa->message->sendButtonAction(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendPix`
+
+```php
+$wa->message->sendPix(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendList`
+
+```php
+$wa->message->sendList(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendSurvey`
+
+```php
+$wa->message->sendSurvey(string $to, string $name, array $options): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $name | string | Yes | Name |
+| $options | array | Yes | Array of option strings |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendTitle`
+
+```php
+$wa->message->sendTitle(string $to, string $title, string $text, string $footer): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $title | string | Yes | Title text |
+| $text | string | Yes | Text content of the message |
+| $footer | string | Yes | Footer text |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendAudio`
+
+```php
+$wa->message->sendAudio(string $to, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendImage`
+
+```php
+$wa->message->sendImage(string $to, string $url, string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendVideo`
+
+```php
+$wa->message->sendVideo(string $to, string $url, string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendDocument`
+
+```php
+$wa->message->sendDocument(string $to, string $url, string $mimetype, string $fileName = '', string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+| $mimetype | string | Yes | MIME type (e.g. "application/pdf") |
+| $fileName | string | No | Filename for the document (default: '') |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendContact`
+
+```php
+$wa->message->sendContact(string $to, string $fullName, string $phoneNumber, string $organization = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $fullName | string | Yes | Full name of the contact |
+| $phoneNumber | string | Yes | Phone number of the contact |
+| $organization | string | No | Organization name (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendContacts`
+
+```php
+$wa->message->sendContacts(string $to, string $displayName, array $contacts): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $displayName | string | Yes | Display name for the contact list |
+| $contacts | array | Yes | Array of contact objects with fullName, phoneNumber, organization |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendLocation`
+
+```php
+$wa->message->sendLocation(string $to, float $latitude, float $longitude, string $address): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $latitude | float | Yes | Latitude coordinate |
+| $longitude | float | Yes | Longitude coordinate |
+| $address | string | Yes | Address string |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendLiveLocation`
+
+```php
+$wa->message->sendLiveLocation(string $to, float $latitude, float $longitude, string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $latitude | float | Yes | Latitude coordinate |
+| $longitude | float | Yes | Longitude coordinate |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendLink`
+
+```php
+$wa->message->sendLink(string $to, string $title, string $text, string $thumbnailUrl, string $sourceUrl, string $description = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $title | string | Yes | Title text |
+| $text | string | Yes | Text content of the message |
+| $thumbnailUrl | string | Yes | URL of the thumbnail image |
+| $sourceUrl | string | Yes | Source URL for link preview |
+| $description | string | No | Description text (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendReaction`
+
+```php
+$wa->message->sendReaction(string $text, string $msgId): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $text | string | Yes | Text content of the message |
+| $msgId | string | Yes | Message ID |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendSticker`
+
+```php
+$wa->message->sendSticker(string $to, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendVideoNote`
+
+```php
+$wa->message->sendVideoNote(string $to, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendPoll`
+
+```php
+$wa->message->sendPoll(string $to, string $name, array $values, int $selectableCount = 1): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $name | string | Yes | Name |
+| $values | array | Yes | Array of poll option values |
+| $selectableCount | int | No | Number of selectable options in a poll (default: 1) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendEvent`
+
+```php
+$wa->message->sendEvent(string $to, string $name, string $description, string $startTime, string $locationName = '', string $locationAddress = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $name | string | Yes | Name |
+| $description | string | Yes | Description text |
+| $startTime | string | Yes | ISO 8601 datetime (e.g. "2026-06-10T14:00:00Z") |
+| $locationName | string | No | Location name (default: '') |
+| $locationAddress | string | No | Location address (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `pin`
+
+```php
+$wa->message->pin(string $id, int $duration = 604800): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $duration | int | No | Duration in seconds (default: 604800) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `unpin`
+
+```php
+$wa->message->unpin(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendCallLink`
+
+```php
+$wa->message->sendCallLink(string $to, string $type = 'audio', string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $type | string | No | Type identifier (default: 'audio') |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `createCallLink`
+
+```php
+$wa->message->createCallLink(string $type = 'audio'): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $type | string | No | Type identifier (default: 'audio') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getDetails`
+
+```php
+$wa->message->getDetails(string $messageId): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $messageId | string | Yes | Message ID |
+
+**Returns:** `?string` - JSON response from the API
+
+### `downloadMedia`
+
+```php
+$wa->message->downloadMedia(string $messageId, string $format = 'json'): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $messageId | string | Yes | Message ID |
+| $format | string | No | Response format: "json" (base64) or "binary" (default: 'json') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendBase64Image`
+
+```php
+$wa->message->sendBase64Image(string $to, string $base64, string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $base64 | string | Yes | Base64-encoded media content |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendBase64Audio`
+
+```php
+$wa->message->sendBase64Audio(string $to, string $base64): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $base64 | string | Yes | Base64-encoded media content |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendBase64Document`
+
+```php
+$wa->message->sendBase64Document(string $to, string $base64, string $mimetype, string $fileName = '', string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $base64 | string | Yes | Base64-encoded media content |
+| $mimetype | string | Yes | MIME type (e.g. "application/pdf") |
+| $fileName | string | No | Filename for the document (default: '') |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendProduct`
+
+```php
+$wa->message->sendProduct(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendGroupInvite`
+
+```php
+$wa->message->sendGroupInvite(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `requestPhone`
+
+```php
+$wa->message->requestPhone(string $to): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyText`
+
+```php
+$wa->message->replyText(string $id, string $to, string $text): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $text | string | Yes | Text content of the message |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyButtonReply`
+
+```php
+$wa->message->replyButtonReply(string $id, array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyButtonAction`
+
+```php
+$wa->message->replyButtonAction(string $id, array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyPix`
+
+```php
+$wa->message->replyPix(string $id, array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyTitle`
+
+```php
+$wa->message->replyTitle(string $id, string $to, string $title, string $text, string $footer): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $title | string | Yes | Title text |
+| $text | string | Yes | Text content of the message |
+| $footer | string | Yes | Footer text |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyAudio`
+
+```php
+$wa->message->replyAudio(string $id, string $to, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyImage`
+
+```php
+$wa->message->replyImage(string $id, string $to, string $url, string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyVideo`
+
+```php
+$wa->message->replyVideo(string $id, string $to, string $url, string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyDocument`
+
+```php
+$wa->message->replyDocument(string $id, string $to, string $url, string $mimetype, string $fileName = '', string $caption = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $url | string | Yes | URL of the media file |
+| $mimetype | string | Yes | MIME type (e.g. "application/pdf") |
+| $fileName | string | No | Filename for the document (default: '') |
+| $caption | string | No | Caption for the media (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyContact`
+
+```php
+$wa->message->replyContact(string $id, string $to, string $fullName, string $phoneNumber, string $organization = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $fullName | string | Yes | Full name of the contact |
+| $phoneNumber | string | Yes | Phone number of the contact |
+| $organization | string | No | Organization name (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `replyLocation`
+
+```php
+$wa->message->replyLocation(string $id, string $to, float $latitude, float $longitude, string $address): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+| $latitude | float | Yes | Latitude coordinate |
+| $longitude | float | Yes | Longitude coordinate |
+| $address | string | Yes | Address string |
+
+**Returns:** `?string` - JSON response from the API
+
+## Chat
+
+### `getAll`
+
+```php
+$wa->chat->getAll(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `modify`
+
+```php
+$wa->chat->modify(string $id, string $action, bool $value): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $action | string | Yes | Action to perform |
+| $value | bool | Yes | Boolean value |
+
+**Returns:** `?string` - JSON response from the API
+
+### `delete`
+
+```php
+$wa->chat->delete(string $chatId): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $chatId | string | Yes | Chat identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getMessages`
+
+```php
+$wa->chat->getMessages(string $chatId, int $page = 1, int $limit = 20): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $chatId | string | Yes | Chat identifier |
+| $page | int | No | Page number for pagination (default: 1) |
+| $limit | int | No | Number of items per page (default: 20) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `subscribePresence`
+
+```php
+$wa->chat->subscribePresence(string $jid): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $jid | string | Yes | WhatsApp JID (e.g. "5511999999999@s.whatsapp.net") |
+
+**Returns:** `?string` - JSON response from the API
+
+### `setDisappearing`
+
+```php
+$wa->chat->setDisappearing(string $jid, int $expiration): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $jid | string | Yes | WhatsApp JID (e.g. "5511999999999@s.whatsapp.net") |
+| $expiration | int | Yes | Expiration time in seconds |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getPrivacy`
+
+```php
+$wa->chat->getPrivacy(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+## Contact
+
+### `list`
+
+```php
+$wa->contact->list(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `add`
+
+```php
+$wa->contact->add(string $number, string $name): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+| $name | string | Yes | Name |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getProfile`
+
+```php
+$wa->contact->getProfile(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+### `remove`
+
+```php
+$wa->contact->remove(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+### `blockAction`
+
+```php
+$wa->contact->blockAction(string $number, string $action): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+| $action | string | Yes | Action to perform |
+
+**Returns:** `?string` - JSON response from the API
+
+### `block`
+
+```php
+$wa->contact->block(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+### `unblock`
+
+```php
+$wa->contact->unblock(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+### `clearSession`
+
+```php
+$wa->contact->clearSession(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getStatus`
+
+```php
+$wa->contact->getStatus(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+### `listBlocked`
+
+```php
+$wa->contact->listBlocked(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `resolveLids`
+
+```php
+$wa->contact->resolveLids(array $lids): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $lids | array | Yes | Array of LID JIDs to resolve |
+
+**Returns:** `?string` - JSON response from the API
+
+### `isRegistered`
+
+```php
+$wa->contact->isRegistered(string $number): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $number | string | Yes | Phone number |
+
+**Returns:** `?string` - JSON response from the API
+
+## Group
+
+### `list`
+
+```php
+$wa->group->list(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `create`
+
+```php
+$wa->group->create(string $name, array $participants): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $name | string | Yes | Name |
+| $participants | array | Yes | Array of phone numbers |
+
+**Returns:** `?string` - JSON response from the API
+
+### `get`
+
+```php
+$wa->group->get(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `update`
+
+```php
+$wa->group->update(string $id, string $name, string $description): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $name | string | Yes | Name |
+| $description | string | Yes | Description text |
+
+**Returns:** `?string` - JSON response from the API
+
+### `changeSettings`
+
+```php
+$wa->group->changeSettings(string $id, string $setting): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $setting | string | Yes | Setting name |
+
+**Returns:** `?string` - JSON response from the API
+
+### `leave`
+
+```php
+$wa->group->leave(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getMembers`
+
+```php
+$wa->group->getMembers(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getInviteCode`
+
+```php
+$wa->group->getInviteCode(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getInviteInfo`
+
+```php
+$wa->group->getInviteInfo(string $code): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $code | string | Yes | Invite or verification code |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updatePicture`
+
+```php
+$wa->group->updatePicture(string $id, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `removePicture`
+
+```php
+$wa->group->removePicture(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `addParticipants`
+
+```php
+$wa->group->addParticipants(string $id, array $participants): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+
+**Returns:** `?string` - JSON response from the API
+
+### `removeParticipants`
+
+```php
+$wa->group->removeParticipants(string $id, array $participants): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+
+**Returns:** `?string` - JSON response from the API
+
+### `changeRole`
+
+```php
+$wa->group->changeRole(string $id, array $participants, string $action): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+| $action | string | Yes | Action to perform |
+
+**Returns:** `?string` - JSON response from the API
+
+### `promote`
+
+```php
+$wa->group->promote(string $id, array $participants): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+
+**Returns:** `?string` - JSON response from the API
+
+### `demote`
+
+```php
+$wa->group->demote(string $id, array $participants): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getRequestParticipants`
+
+```php
+$wa->group->getRequestParticipants(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `handleRequestParticipants`
+
+```php
+$wa->group->handleRequestParticipants(string $id, array $participants, string $action): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+| $action | string | Yes | Action to perform |
+
+**Returns:** `?string` - JSON response from the API
+
+## Community
+
+### `list`
+
+```php
+$wa->community->list(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `create`
+
+```php
+$wa->community->create(string $name, string $subject): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $name | string | Yes | Name |
+| $subject | string | Yes | Subject text |
+
+**Returns:** `?string` - JSON response from the API
+
+### `get`
+
+```php
+$wa->community->get(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `update`
+
+```php
+$wa->community->update(string $id, string $subject, string $description): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $subject | string | Yes | Subject text |
+| $description | string | Yes | Description text |
+
+**Returns:** `?string` - JSON response from the API
+
+### `leave`
+
+```php
+$wa->community->leave(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updatePicture`
+
+```php
+$wa->community->updatePicture(string $id, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getInviteCode`
+
+```php
+$wa->community->getInviteCode(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `removeParticipants`
+
+```php
+$wa->community->removeParticipants(string $id, array $participants): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getRequestParticipants`
+
+```php
+$wa->community->getRequestParticipants(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `handleRequestParticipants`
+
+```php
+$wa->community->handleRequestParticipants(string $id, array $participants, string $action): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $participants | array | Yes | Array of phone numbers |
+| $action | string | Yes | Action to perform |
+
+**Returns:** `?string` - JSON response from the API
+
+### `acceptInvite`
+
+```php
+$wa->community->acceptInvite(string $code): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $code | string | Yes | Invite or verification code |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getInviteInfo`
+
+```php
+$wa->community->getInviteInfo(string $code): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $code | string | Yes | Invite or verification code |
+
+**Returns:** `?string` - JSON response from the API
+
+### `createGroup`
+
+```php
+$wa->community->createGroup(string $id, string $subject, array $participants = []): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $subject | string | Yes | Subject text |
+| $participants | array | No | Array of phone numbers (default: []) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `setEphemeral`
+
+```php
+$wa->community->setEphemeral(string $id, int $expiration): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $expiration | int | Yes | Expiration time in seconds |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateSettings`
+
+```php
+$wa->community->updateSettings(string $id, string $setting): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $setting | string | Yes | Setting name |
+
+**Returns:** `?string` - JSON response from the API
+
+### `setMemberAddMode`
+
+```php
+$wa->community->setMemberAddMode(string $id, string $mode): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $mode | string | Yes | Mode value |
+
+**Returns:** `?string` - JSON response from the API
+
+### `setJoinApproval`
+
+```php
+$wa->community->setJoinApproval(string $id, string $mode): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $mode | string | Yes | Mode value |
+
+**Returns:** `?string` - JSON response from the API
+
+## Label
+
+### `list`
+
+```php
+$wa->label->list(): ?string
+```
+
+**Returns:** `?string` - JSON response from the API
+
+### `create`
+
+```php
+$wa->label->create(string $name, string $labelId = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $name | string | Yes | Name |
+| $labelId | string | No | Label identifier (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getChats`
+
+```php
+$wa->label->getChats(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `addToChat`
+
+```php
+$wa->label->addToChat(string $id, string $to): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+
+**Returns:** `?string` - JSON response from the API
+
+### `delete`
+
+```php
+$wa->label->delete(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `removeFromChat`
+
+```php
+$wa->label->removeFromChat(string $id, string $to): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+
+**Returns:** `?string` - JSON response from the API
+
+## Newsletter
+
+### `create`
+
+```php
+$wa->newsletter->create(string $name, string $description = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $name | string | Yes | Name |
+| $description | string | No | Description text (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getMetadata`
+
+```php
+$wa->newsletter->getMetadata(string $type, string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $type | string | Yes | Type identifier |
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getSubscribers`
+
+```php
+$wa->newsletter->getSubscribers(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getAdmins`
+
+```php
+$wa->newsletter->getAdmins(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `follow`
+
+```php
+$wa->newsletter->follow(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `unfollow`
+
+```php
+$wa->newsletter->unfollow(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateName`
+
+```php
+$wa->newsletter->updateName(string $id, string $name): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $name | string | Yes | Name |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateDescription`
+
+```php
+$wa->newsletter->updateDescription(string $id, string $description): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $description | string | Yes | Description text |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updatePicture`
+
+```php
+$wa->newsletter->updatePicture(string $id, string $url): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $url | string | Yes | URL of the media file |
+
+**Returns:** `?string` - JSON response from the API
+
+### `removePicture`
+
+```php
+$wa->newsletter->removePicture(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `transferOwnership`
+
+```php
+$wa->newsletter->transferOwnership(string $id, string $newOwnerJid): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $newOwnerJid | string | Yes | JID of the new owner |
+
+**Returns:** `?string` - JSON response from the API
+
+### `demoteAdmin`
+
+```php
+$wa->newsletter->demoteAdmin(string $id, string $userJid): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $userJid | string | Yes | JID of the user |
+
+**Returns:** `?string` - JSON response from the API
+
+### `getMessages`
+
+```php
+$wa->newsletter->getMessages(string $id, int $count = 10, int $since = null, int $after = null): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $count | int | No | Number of items to fetch (default: 10) |
+| $since | int | No | Unix timestamp filter (default: null) |
+| $after | int | No | Cursor for pagination (default: null) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `react`
+
+```php
+$wa->newsletter->react(string $id, string $serverId, string $reaction): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $serverId | string | Yes | Newsletter server message ID |
+| $reaction | string | Yes | Reaction emoji |
+
+**Returns:** `?string` - JSON response from the API
+
+### `mute`
+
+```php
+$wa->newsletter->mute(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `unmute`
+
+```php
+$wa->newsletter->unmute(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `delete`
+
+```php
+$wa->newsletter->delete(string $id): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+## Business
+
+### `listCatalog`
+
+```php
+$wa->business->listCatalog(int $limit = 10, string $cursor = ''): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $limit | int | No | Number of items per page (default: 10) |
+| $cursor | string | No | Cursor for pagination (default: '') |
+
+**Returns:** `?string` - JSON response from the API
+
+### `createProduct`
+
+```php
+$wa->business->createProduct(array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `updateProduct`
+
+```php
+$wa->business->updateProduct(string $productId, array $body): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $productId | string | Yes | Product identifier |
+| $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `deleteProduct`
+
+```php
+$wa->business->deleteProduct(string $productId): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $productId | string | Yes | Product identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+## Status
+
+### `sendText`
+
+```php
+$wa->status->sendText(string $text, array $statusJidList = []): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $text | string | Yes | Text content of the message |
+| $statusJidList | array | No | Array of JIDs who can see the status (empty = all contacts) (default: []) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendImage`
+
+```php
+$wa->status->sendImage(string $url, string $caption = '', array $statusJidList = []): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $url | string | Yes | URL of the media file |
+| $caption | string | No | Caption for the media (default: '') |
+| $statusJidList | array | No | Array of JIDs who can see the status (empty = all contacts) (default: []) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendVideo`
+
+```php
+$wa->status->sendVideo(string $url, string $caption = '', array $statusJidList = []): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $url | string | Yes | URL of the media file |
+| $caption | string | No | Caption for the media (default: '') |
+| $statusJidList | array | No | Array of JIDs who can see the status (empty = all contacts) (default: []) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendAudio`
+
+```php
+$wa->status->sendAudio(string $url, array $statusJidList = []): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $url | string | Yes | URL of the media file |
+| $statusJidList | array | No | Array of JIDs who can see the status (empty = all contacts) (default: []) |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendMention`
+
+```php
+$wa->status->sendMention(string $jid, string $statusMsgId): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $jid | string | Yes | WhatsApp JID (e.g. "5511999999999@s.whatsapp.net") |
+| $statusMsgId | string | Yes | Status message ID to mention |
+
+**Returns:** `?string` - JSON response from the API
+
+## Call
+
+### `make`
+
+```php
+$wa->call->make(string $to): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
+
+**Returns:** `?string` - JSON response from the API
+
+### `reject`
+
+```php
+$wa->call->reject(string $id, string $from): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $id | string | Yes | Resource identifier |
+| $from | string | Yes | Caller identifier |
+
+**Returns:** `?string` - JSON response from the API
+
+### `accept`
+
+```php
+$wa->call->accept(string $callId, string $callFrom): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $callId | string | Yes | Call identifier |
+| $callFrom | string | Yes | Caller JID |
+
+**Returns:** `?string` - JSON response from the API
+
+### `end`
+
+```php
+$wa->call->end(string $callId, string $peerJid): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $callId | string | Yes | Call identifier |
+| $peerJid | string | Yes | Peer JID in the call |
+
+**Returns:** `?string` - JSON response from the API
+
+## Webhook
+
+### `parse`
+
+```php
+$wa->webhook->parse(string $rawInput = null): ?stdClass
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $rawInput | string | No | Raw JSON string from webhook (defaults to php://input) (default: null) |
+
+**Returns:** `?stdClass` - JSON response from the API
+
+## Webhook Response Properties
+
+After calling `$wa->webhook->parse()`, the returned object has these properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| remoteJid | string | Sender phone number (digits only) |
+| msgId | string | Message ID |
+| pushName | string | Sender display name |
+| messageType | string | Message type: text, image, audio, video, document, sticker, location, liveLocation, contact, button, list, reaction |
+| text | string | Text content (text, reaction, and list messages) |
+| selectedId | string | Selected button or list row ID |
+| title | string | List response title |
+| latitude | float | Location latitude |
+| longitude | float | Location longitude |
+| thumbnail | string | Base64 data URI for thumbnails |
+| mimetype | string | Media MIME type |
+| mediaURL | string | Direct media download URL |
+| mediaBase64 | string | Base64-encoded media content |
+| fileName | string | Document filename |
+| caption | string | Media caption |
+| messageKeys | array | Array with mediaKey, directPath, url, messageType |
+| contact | array | Array of objects with name and number properties |
+
+## Webhook Usage Example
+
+```php
+$wa = new WhatsApp(['server' => 'https://server.api-wa.me', 'key' => 'YOUR_KEY']);
+$parsed = $wa->webhook->parse();
+
+if ($parsed && $parsed->messageType === 'text') {
+    $wa->message->sendText($parsed->remoteJid, 'You said: ' . $parsed->text);
+}
+
+if ($parsed && $parsed->messageType === 'image') {
+    // Access media
+    $url = $parsed->mediaURL;
+    $base64 = $parsed->mediaBase64;
+    $caption = $parsed->caption ?? '';
+}
+```
