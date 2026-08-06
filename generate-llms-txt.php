@@ -315,7 +315,7 @@ foreach ($classes as $label => $className) {
 
 // Webhook special section — Meta / "wame" envelope parser
 $out .= "## Webhook (Meta envelope)\n\n";
-$out .= "The API delivers webhooks in the Meta / \"wame\" envelope format (multichannel). `\$wa->webhook->parseMeta(\$body = null)` reads php://input (or a decoded array) and returns a list of normalized event arrays. It never throws: an invalid body returns `[]`.\n\n";
+$out .= "Enable it by setting `'webhookFormat' => 'meta'` in `\$wa->instance->updateWebhook([...])`. The API then delivers webhooks in the Meta / \"wame\" envelope format (multichannel). `\$wa->webhook->parseMeta(\$body = null)` reads php://input (or a decoded array) and returns a list of normalized event arrays. It never throws: an invalid body returns `[]`.\n\n";
 $out .= "Every event includes these base keys:\n\n";
 $out .= "| Key | Type | Description |\n";
 $out .= "|-----|------|-------------|\n";

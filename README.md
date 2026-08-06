@@ -102,6 +102,7 @@ $wa->instance->updateSettings(
 $wa->instance->updateWebhook([
     'allowWebhook'         => true,
     'allowNumber'          => 'all',
+    'webhookFormat'        => 'meta', // deliver payloads in the Meta envelope (use $wa->webhook->parseMeta())
     'webhookMessage'       => 'https://yourserver.com/webhook',
     'webhookGroup'         => '',
     'webhookConnection'    => '',
@@ -564,9 +565,10 @@ $wa->call->end('CALL_ID', 'PEER_JID');
 
 ## Webhook
 
-The API delivers webhooks in the **Meta / "wame" envelope** format (multichannel:
-`whatsapp` / `instagram` / `messenger`). Use `parseMeta()` to turn a request body
-into a list of normalized events:
+Enable the Meta envelope format on your instance by setting `'webhookFormat' => 'meta'`
+in `updateWebhook(...)` (see [Instance](#instance)). The API then delivers webhooks in
+the **Meta / "wame" envelope** format (multichannel: `whatsapp` / `instagram` /
+`messenger`). Use `parseMeta()` to turn a request body into a list of normalized events:
 
 ```php
 $events = $wa->webhook->parseMeta(); // reads php://input; or pass a decoded array

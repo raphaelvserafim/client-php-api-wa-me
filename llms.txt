@@ -2345,7 +2345,7 @@ $wa->webhook->parseMeta(array $body = null): array
 
 ## Webhook (Meta envelope)
 
-The API delivers webhooks in the Meta / "wame" envelope format (multichannel). `$wa->webhook->parseMeta($body = null)` reads php://input (or a decoded array) and returns a list of normalized event arrays. It never throws: an invalid body returns `[]`.
+Enable it by setting `'webhookFormat' => 'meta'` in `$wa->instance->updateWebhook([...])`. The API then delivers webhooks in the Meta / "wame" envelope format (multichannel). `$wa->webhook->parseMeta($body = null)` reads php://input (or a decoded array) and returns a list of normalized event arrays. It never throws: an invalid body returns `[]`.
 
 Every event includes these base keys:
 
