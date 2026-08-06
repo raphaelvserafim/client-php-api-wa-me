@@ -1,13 +1,19 @@
 <?php
 
-use Api\Wame\WhatsApp;
+use Api\Wame\Wame;
+use Api\Wame\Provider;
 
 include_once 'vendor/autoload.php';
 
-$wa = new WhatsApp([
+$wa = new Wame([
     'server' => 'https://server.api-wa.me',
     'key' => 'YOUR_KEY',
+    // Optional default channel for every send (whatsapp | instagram | messenger)
+    // 'provider' => Provider::INSTAGRAM,
 ]);
+
+// `WhatsApp` still works as a backward-compatible alias of `Wame`:
+// $wa = new WhatsApp(['server' => '...', 'key' => '...']);
 
 // Instance
 $wa->instance->connect();
@@ -26,6 +32,9 @@ $wa->message->sendContact('5511999999999', 'John Doe', '5511888888888');
 $wa->message->sendReaction('👍', 'MESSAGE_ID');
 $wa->message->sendSticker('5511999999999', 'https://example.com/sticker.webp');
 $wa->message->sendPoll('5511999999999', 'Favorite color?', ['Red', 'Blue', 'Green']);
+
+// Multichannel: override the channel per send (whatsapp | instagram | messenger)
+$wa->message->sendText('IG_USER_ID', 'Hi from Instagram', Provider::INSTAGRAM);
 
 // Reply to a message
 $wa->message->replyText('MESSAGE_ID', '5511999999999', 'This is a reply!');
@@ -101,10 +110,13 @@ $wa->call->make('5511999999999');
 // Business
 $wa->business->listCatalog();
 
-// Webhook (use in your webhook endpoint)
-$parsed = $wa->webhook->parse();
-if ($parsed) {
-    echo $parsed->messageType; // text, image, audio, etc.
-    echo $parsed->text ?? '';
-    echo $parsed->remoteJid;
+// Webhook (use in your webhook endpoint) — Meta/envelope format, multichannel
+$events = $wa->webhook->parseMeta(); // reads php://input
+foreach ($events as $e) {
+    echo $e['type'];              // text, image, audio, ..., status, presence, ...
+    echo $e['provider'] ?? '';    // whatsapp | instagram | messenger
+    if ($e['type'] === 'text') {
+        echo $e['text']['body'];  // message text
+        echo $e['from'];          // sender id
+    }
 }

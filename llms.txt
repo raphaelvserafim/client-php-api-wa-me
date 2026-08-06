@@ -17,11 +17,11 @@ composer require raphaelvserafim/client-php-api-wa-me
 ## Quick Start
 
 ```php
-use Api\Wame\WhatsApp;
+use Api\Wame\Wame;
 
 require 'vendor/autoload.php';
 
-$wa = new WhatsApp([
+$wa = new Wame([
     'server' => 'https://server.api-wa.me',
     'key'    => 'YOUR_INSTANCE_KEY',
 ]);
@@ -29,9 +29,25 @@ $wa = new WhatsApp([
 $wa->message->sendText('5511999999999', 'Hello!');
 ```
 
+`WhatsApp` remains available as a backward-compatible alias of `Wame` (`new WhatsApp([...])` behaves identically).
+
+## Multichannel (provider)
+
+The API can send/receive through `whatsapp`, `instagram` or `messenger`. Set a client-wide default with the `provider` option, or override per send.
+
+```php
+use Api\Wame\Provider;
+
+$wa = new Wame(['server' => '...', 'key' => '...', 'provider' => Provider::INSTAGRAM]);
+$wa->message->sendText('IG_USER_ID', 'Hi');                        // provider: instagram
+$wa->message->sendText('5511999999999', 'Hi', Provider::WHATSAPP); // per-call override
+```
+
+Provider injection applies to sendText, sendAudio, sendImage, sendVideo, sendDocument, sendButtonAction/sendButtonReply and sendTemplate. When unset, the field is omitted and the API assumes `whatsapp`.
+
 ## Architecture
 
-The WhatsApp class is a facade that exposes domain-specific modules as public properties:
+The Wame class (aliased by WhatsApp) is a facade that exposes domain-specific modules as public properties:
 
 | Property | Description |
 |----------|-------------|
@@ -286,7 +302,7 @@ $wa->message->sendPresence(string $to, string $status): ?string
 ### `sendText`
 
 ```php
-$wa->message->sendText(string $to, string $text): ?string
+$wa->message->sendText(string $to, string $text, string $provider = null): ?string
 ```
 
 **Parameters:**
@@ -295,6 +311,7 @@ $wa->message->sendText(string $to, string $text): ?string
 |-----------|------|----------|-------------|
 | $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
 | $text | string | Yes | Text content of the message |
+| $provider | string | No | Default: null |
 
 **Returns:** `?string` - JSON response from the API
 
@@ -323,6 +340,20 @@ $wa->message->sendButtonAction(array $body): ?string
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | $body | array | Yes | Request body as associative array |
+
+**Returns:** `?string` - JSON response from the API
+
+### `sendTemplate`
+
+```php
+$wa->message->sendTemplate(array $data): ?string
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $data | array | Yes |  |
 
 **Returns:** `?string` - JSON response from the API
 
@@ -390,7 +421,7 @@ $wa->message->sendTitle(string $to, string $title, string $text, string $footer)
 ### `sendAudio`
 
 ```php
-$wa->message->sendAudio(string $to, string $url): ?string
+$wa->message->sendAudio(string $to, string $url, string $provider = null): ?string
 ```
 
 **Parameters:**
@@ -399,13 +430,14 @@ $wa->message->sendAudio(string $to, string $url): ?string
 |-----------|------|----------|-------------|
 | $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
 | $url | string | Yes | URL of the media file |
+| $provider | string | No | Default: null |
 
 **Returns:** `?string` - JSON response from the API
 
 ### `sendImage`
 
 ```php
-$wa->message->sendImage(string $to, string $url, string $caption = ''): ?string
+$wa->message->sendImage(string $to, string $url, string $caption = '', string $provider = null): ?string
 ```
 
 **Parameters:**
@@ -415,13 +447,14 @@ $wa->message->sendImage(string $to, string $url, string $caption = ''): ?string
 | $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
 | $url | string | Yes | URL of the media file |
 | $caption | string | No | Caption for the media (default: '') |
+| $provider | string | No | Default: null |
 
 **Returns:** `?string` - JSON response from the API
 
 ### `sendVideo`
 
 ```php
-$wa->message->sendVideo(string $to, string $url, string $caption = ''): ?string
+$wa->message->sendVideo(string $to, string $url, string $caption = '', string $provider = null): ?string
 ```
 
 **Parameters:**
@@ -431,13 +464,14 @@ $wa->message->sendVideo(string $to, string $url, string $caption = ''): ?string
 | $to | string | Yes | Recipient phone number (e.g. "5511999999999") or group ID ("groupId@g.us") |
 | $url | string | Yes | URL of the media file |
 | $caption | string | No | Caption for the media (default: '') |
+| $provider | string | No | Default: null |
 
 **Returns:** `?string` - JSON response from the API
 
 ### `sendDocument`
 
 ```php
-$wa->message->sendDocument(string $to, string $url, string $mimetype, string $fileName = '', string $caption = ''): ?string
+$wa->message->sendDocument(string $to, string $url, string $mimetype, string $fileName = '', string $caption = '', string $provider = null): ?string
 ```
 
 **Parameters:**
@@ -449,6 +483,7 @@ $wa->message->sendDocument(string $to, string $url, string $mimetype, string $fi
 | $mimetype | string | Yes | MIME type (e.g. "application/pdf") |
 | $fileName | string | No | Filename for the document (default: '') |
 | $caption | string | No | Caption for the media (default: '') |
+| $provider | string | No | Default: null |
 
 **Returns:** `?string` - JSON response from the API
 
@@ -2294,44 +2329,52 @@ $wa->webhook->parse(string $rawInput = null): ?stdClass
 
 **Returns:** `?stdClass` - JSON response from the API
 
-## Webhook Response Properties
+### `parseMeta`
 
-After calling `$wa->webhook->parse()`, the returned object has these properties:
+```php
+$wa->webhook->parseMeta(array $body = null): array
+```
 
-| Property | Type | Description |
-|----------|------|-------------|
-| remoteJid | string | Sender phone number (digits only) |
-| msgId | string | Message ID |
-| pushName | string | Sender display name |
-| messageType | string | Message type: text, image, audio, video, document, sticker, location, liveLocation, contact, button, list, reaction |
-| text | string | Text content (text, reaction, and list messages) |
-| selectedId | string | Selected button or list row ID |
-| title | string | List response title |
-| latitude | float | Location latitude |
-| longitude | float | Location longitude |
-| thumbnail | string | Base64 data URI for thumbnails |
-| mimetype | string | Media MIME type |
-| mediaURL | string | Direct media download URL |
-| mediaBase64 | string | Base64-encoded media content |
-| fileName | string | Document filename |
-| caption | string | Media caption |
-| messageKeys | array | Array with mediaKey, directPath, url, messageType |
-| contact | array | Array of objects with name and number properties |
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| $body | array | No | Request body as associative array (default: null) |
+
+**Returns:** `array` - JSON response from the API
+
+## Webhook (Meta envelope)
+
+The API delivers webhooks in the Meta / "wame" envelope format (multichannel). `$wa->webhook->parseMeta($body = null)` reads php://input (or a decoded array) and returns a list of normalized event arrays. It never throws: an invalid body returns `[]`.
+
+Every event includes these base keys:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| type | string | Event type: text, image, audio, video, document, sticker, location, contacts, reaction, reaction-removed, button, list-reply, button-reply, referral, edit, unsupported, status, presence, connection.open, connection.close, qrcode, call, group.participants, group.update, health, unknown |
+| provider | string | Channel: whatsapp, instagram or messenger |
+| official | bool | True when delivered via the official Meta Cloud API |
+| field | string | Original category: messages, presence, connection, qrcode, call, groups, health |
+| instanceId | string | Instance identifier (entry[].id) |
+| metadata | array | phoneNumberId and optional displayPhoneNumber |
+| raw | array | The untouched incoming envelope |
+
+Message events additionally carry: `from`, `fromUserId` (Instagram/Messenger), `profile` (name/username/picture), `messageId`, `timestamp`, and an optional `fromMe`, `groupId`, `context`, `referral`, plus a type-specific payload (e.g. `text.body`, `image`, `audio`, `location`, `contacts`).
 
 ## Webhook Usage Example
 
 ```php
-$wa = new WhatsApp(['server' => 'https://server.api-wa.me', 'key' => 'YOUR_KEY']);
-$parsed = $wa->webhook->parse();
+$wa = new Wame(['server' => 'https://server.api-wa.me', 'key' => 'YOUR_KEY']);
 
-if ($parsed && $parsed->messageType === 'text') {
-    $wa->message->sendText($parsed->remoteJid, 'You said: ' . $parsed->text);
-}
-
-if ($parsed && $parsed->messageType === 'image') {
-    // Access media
-    $url = $parsed->mediaURL;
-    $base64 = $parsed->mediaBase64;
-    $caption = $parsed->caption ?? '';
+foreach ($wa->webhook->parseMeta() as $e) {
+    if ($e['type'] === 'text') {
+        $wa->message->sendText($e['from'], 'You said: ' . $e['text']['body'], $e['provider']);
+    }
+    if ($e['type'] === 'image') {
+        $mediaId = $e['image']['id'] ?? null;
+        $caption = $e['image']['caption'] ?? '';
+    }
 }
 ```
+
+The legacy `$wa->webhook->parse()` (baileys-style payloads) remains available but is deprecated.

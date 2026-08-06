@@ -1,0 +1,44 @@
+{
+  "object": "wame",
+  "provider": "messenger",
+  "instance": "your-instance-id",
+  "official": true,
+  "entry": [
+    {
+      "id": "1020000000000000",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "messenger",
+            "metadata": {
+              "phone_number_id": "your-instance-id"
+            },
+            "contacts": [
+              {
+                "wa_id": "",
+                "user_id": "2600000000000000",
+                "profile": {
+                  "name": "Fulano",
+                  "picture": "https://cdn.facebook.com/pic.jpg"
+                }
+              }
+            ],
+            "messages": [
+              {
+                "from": "2600000000000000",
+                "from_user_id": "2600000000000000",
+                "id": "mEXAMPLEMID",
+                "timestamp": "1700000000",
+                "text": {
+                  "body": "Olá!"
+                },
+                "type": "text"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

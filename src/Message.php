@@ -6,9 +6,30 @@ class Message
 {
     private HttpClient $http;
 
-    public function __construct(HttpClient $http)
+    /** Client-level default provider applied to every send unless overridden. */
+    private ?string $defaultProvider;
+
+    public function __construct(HttpClient $http, ?string $defaultProvider = null)
     {
         $this->http = $http;
+        $this->defaultProvider = $defaultProvider;
+    }
+
+    /**
+     * Fill in the client-level default provider when the body does not set one.
+     *
+     * A per-call `$override` always wins; otherwise the client default is used
+     * only when `$body` has no `provider` yet. When neither is present the field
+     * is omitted and the API falls back to `whatsapp`.
+     */
+    private function withProvider(array $body, ?string $override = null): array
+    {
+        if ($override !== null) {
+            $body['provider'] = $override;
+        } elseif ($this->defaultProvider !== null && !isset($body['provider'])) {
+            $body['provider'] = $this->defaultProvider;
+        }
+        return $body;
     }
 
     public function sendPresence(string $to, string $status): ?string
@@ -16,19 +37,25 @@ class Message
         return $this->http->post('/message/presence', ['to' => $to, 'status' => $status]);
     }
 
-    public function sendText(string $to, string $text): ?string
+    public function sendText(string $to, string $text, ?string $provider = null): ?string
     {
-        return $this->http->post('/message/text', ['to' => $to, 'text' => $text]);
+        return $this->http->post('/message/text', $this->withProvider(['to' => $to, 'text' => $text], $provider));
     }
 
     public function sendButtonReply(array $body): ?string
     {
-        return $this->http->post('/message/button_reply', $body);
+        return $this->http->post('/message/button_reply', $this->withProvider($body));
     }
 
     public function sendButtonAction(array $body): ?string
     {
-        return $this->http->post('/message/button_action', $body);
+        return $this->http->post('/message/button_action', $this->withProvider($body));
+    }
+
+    /** Send an approved template message (official only). */
+    public function sendTemplate(array $data): ?string
+    {
+        return $this->http->post('/message/template', $this->withProvider($data));
     }
 
     public function sendPix(array $body): ?string
@@ -51,26 +78,26 @@ class Message
         return $this->http->post('/message/title', ['to' => $to, 'title' => $title, 'text' => $text, 'footer' => $footer]);
     }
 
-    public function sendAudio(string $to, string $url): ?string
+    public function sendAudio(string $to, string $url, ?string $provider = null): ?string
     {
-        return $this->http->post('/message/audio', ['to' => $to, 'url' => $url]);
+        return $this->http->post('/message/audio', $this->withProvider(['to' => $to, 'url' => $url], $provider));
     }
 
-    public function sendImage(string $to, string $url, string $caption = ''): ?string
+    public function sendImage(string $to, string $url, string $caption = '', ?string $provider = null): ?string
     {
-        return $this->http->post('/message/image', ['to' => $to, 'url' => $url, 'caption' => $caption]);
+        return $this->http->post('/message/image', $this->withProvider(['to' => $to, 'url' => $url, 'caption' => $caption], $provider));
     }
 
-    public function sendVideo(string $to, string $url, string $caption = ''): ?string
+    public function sendVideo(string $to, string $url, string $caption = '', ?string $provider = null): ?string
     {
-        return $this->http->post('/message/video', ['to' => $to, 'url' => $url, 'caption' => $caption]);
+        return $this->http->post('/message/video', $this->withProvider(['to' => $to, 'url' => $url, 'caption' => $caption], $provider));
     }
 
-    public function sendDocument(string $to, string $url, string $mimetype, string $fileName = '', string $caption = ''): ?string
+    public function sendDocument(string $to, string $url, string $mimetype, string $fileName = '', string $caption = '', ?string $provider = null): ?string
     {
-        return $this->http->post('/message/document', [
+        return $this->http->post('/message/document', $this->withProvider([
             'to' => $to, 'url' => $url, 'mimetype' => $mimetype, 'fileName' => $fileName, 'caption' => $caption,
-        ]);
+        ], $provider));
     }
 
     public function sendContact(string $to, string $fullName, string $phoneNumber, string $organization = ''): ?string

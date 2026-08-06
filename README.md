@@ -18,11 +18,11 @@ composer require raphaelvserafim/client-php-api-wa-me
 ## Quick Start
 
 ```php
-use Api\Wame\WhatsApp;
+use Api\Wame\Wame;
 
 require 'vendor/autoload.php';
 
-$wa = new WhatsApp([
+$wa = new Wame([
     'server' => 'https://server.api-wa.me',
     'key'    => 'YOUR_KEY',
 ]);
@@ -31,9 +31,35 @@ $wa = new WhatsApp([
 $wa->message->sendText('5511999999999', 'Hello!');
 ```
 
+> `WhatsApp` remains available as a backward-compatible alias of `Wame`
+> (`new WhatsApp([...])` behaves identically). Prefer `Wame` in new code.
+
+## Multichannel (provider)
+
+The API can send/receive through `whatsapp`, `instagram` or `messenger`.
+Set a client-wide default with the `provider` option, or override per send:
+
+```php
+use Api\Wame\Wame;
+use Api\Wame\Provider;
+
+$wa = new Wame([
+    'server'   => 'https://server.api-wa.me',
+    'key'      => 'YOUR_KEY',
+    'provider' => Provider::INSTAGRAM, // default applied to every send
+]);
+
+$wa->message->sendText('IG_USER_ID', 'Hi from Instagram');            // provider: instagram
+$wa->message->sendText('5511999999999', 'Hi', Provider::WHATSAPP);    // per-call override
+```
+
+Provider injection applies to `sendText`, `sendAudio`, `sendImage`, `sendVideo`,
+`sendDocument`, `sendButtonAction`/`sendButtonReply` and `sendTemplate`. When no
+provider is set, the field is omitted and the API assumes `whatsapp`.
+
 ## Architecture
 
-The client is organized into domain-specific modules accessible via the main `WhatsApp` class:
+The client is organized into domain-specific modules accessible via the main `Wame` class:
 
 | Property | Class | Description |
 |----------|-------|-------------|
@@ -538,23 +564,40 @@ $wa->call->end('CALL_ID', 'PEER_JID');
 
 ## Webhook
 
-Use in your webhook endpoint to parse incoming messages:
+The API delivers webhooks in the **Meta / "wame" envelope** format (multichannel:
+`whatsapp` / `instagram` / `messenger`). Use `parseMeta()` to turn a request body
+into a list of normalized events:
 
 ```php
-$parsed = $wa->webhook->parse();
+$events = $wa->webhook->parseMeta(); // reads php://input; or pass a decoded array
 
-if ($parsed) {
-    $parsed->remoteJid;    // sender number
-    $parsed->msgId;        // message ID
-    $parsed->pushName;     // sender name
-    $parsed->messageType;  // text, image, audio, video, document, sticker, location, contact, button, list, reaction, liveLocation
-    $parsed->text;         // text content (for text messages)
+foreach ($events as $e) {
+    $e['type'];       // text, image, audio, ..., status, presence, connection.open, ...
+    $e['provider'];   // whatsapp | instagram | messenger
+    $e['official'];   // bool — true on the official Meta Cloud API
+    $e['from'];       // sender id / wa_id
+    $e['fromUserId']; // provider-scoped id (Instagram/Messenger), when present
+    $e['profile'];    // ['name' => ..., 'username' => ..., 'picture' => ...] when present
 }
 ```
+
+Each message event carries its own payload, e.g. a text event has
+`$e['text']['body']`, an image event has `$e['image']` (`id`, `url`, `mimeType`, ...).
 
 ### Example: Auto-reply bot
 
 ```php
+foreach ($wa->webhook->parseMeta() as $e) {
+    if ($e['type'] === 'text' && $e['text']['body'] === 'Hi') {
+        $wa->message->sendText($e['from'], 'Hello! How can I help you?', $e['provider']);
+    }
+}
+```
+
+### Legacy parser
+
+```php
+// @deprecated — legacy baileys-style payloads. Prefer parseMeta().
 $parsed = $wa->webhook->parse();
 
 if ($parsed && $parsed->messageType === 'text') {

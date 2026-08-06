@@ -1,0 +1,44 @@
+{
+  "object": "wame",
+  "provider": "whatsapp",
+  "instance": "your-instance-id",
+  "official": false,
+  "entry": [
+    {
+      "id": "wame.eW91ci1pbnN0YW5jZS1pZA",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "5566996852025",
+              "phone_number_id": "your-instance-id"
+            },
+            "statuses": [
+              {
+                "id": "WAMID_TEXT",
+                "status": "read",
+                "timestamp": "1700000000",
+                "recipient_id": "5511999998888",
+                "conversation": {
+                  "id": null,
+                  "expiration_timestamp": null,
+                  "origin": {
+                    "type": null
+                  }
+                },
+                "pricing": {
+                  "billable": null,
+                  "pricing_model": null,
+                  "type": null,
+                  "category": null
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

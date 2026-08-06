@@ -10,7 +10,21 @@
  * every public method with its signature and parameters.
  */
 
-require __DIR__ . '/vendor/autoload.php';
+if (is_file(__DIR__ . '/vendor/autoload.php')) {
+    require __DIR__ . '/vendor/autoload.php';
+} else {
+    // Fallback PSR-4 autoloader so this runs without Composer.
+    spl_autoload_register(function (string $class): void {
+        $prefix = 'Api\\Wame\\';
+        if (strncmp($class, $prefix, strlen($prefix)) !== 0) {
+            return;
+        }
+        $file = __DIR__ . '/src/' . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+        if (is_file($file)) {
+            require $file;
+        }
+    });
+}
 
 $classes = [
     'Instance'   => Api\Wame\Instance::class,
@@ -198,17 +212,28 @@ $out .= "```\n\n";
 
 $out .= "## Quick Start\n\n";
 $out .= "```php\n";
-$out .= "use Api\\Wame\\WhatsApp;\n\n";
+$out .= "use Api\\Wame\\Wame;\n\n";
 $out .= "require 'vendor/autoload.php';\n\n";
-$out .= "\$wa = new WhatsApp([\n";
+$out .= "\$wa = new Wame([\n";
 $out .= "    'server' => 'https://server.api-wa.me',\n";
 $out .= "    'key'    => 'YOUR_INSTANCE_KEY',\n";
 $out .= "]);\n\n";
 $out .= "\$wa->message->sendText('5511999999999', 'Hello!');\n";
 $out .= "```\n\n";
+$out .= "`WhatsApp` remains available as a backward-compatible alias of `Wame` (`new WhatsApp([...])` behaves identically).\n\n";
+
+$out .= "## Multichannel (provider)\n\n";
+$out .= "The API can send/receive through `whatsapp`, `instagram` or `messenger`. Set a client-wide default with the `provider` option, or override per send.\n\n";
+$out .= "```php\n";
+$out .= "use Api\\Wame\\Provider;\n\n";
+$out .= "\$wa = new Wame(['server' => '...', 'key' => '...', 'provider' => Provider::INSTAGRAM]);\n";
+$out .= "\$wa->message->sendText('IG_USER_ID', 'Hi');                        // provider: instagram\n";
+$out .= "\$wa->message->sendText('5511999999999', 'Hi', Provider::WHATSAPP); // per-call override\n";
+$out .= "```\n\n";
+$out .= "Provider injection applies to sendText, sendAudio, sendImage, sendVideo, sendDocument, sendButtonAction/sendButtonReply and sendTemplate. When unset, the field is omitted and the API assumes `whatsapp`.\n\n";
 
 $out .= "## Architecture\n\n";
-$out .= "The WhatsApp class is a facade that exposes domain-specific modules as public properties:\n\n";
+$out .= "The Wame class (aliased by WhatsApp) is a facade that exposes domain-specific modules as public properties:\n\n";
 $out .= "| Property | Description |\n";
 $out .= "|----------|-------------|\n";
 $out .= "| \$wa->instance | Connection, settings, profile, proxy, mobile registration |\n";
@@ -288,43 +313,35 @@ foreach ($classes as $label => $className) {
     }
 }
 
-// Webhook special section
-$out .= "## Webhook Response Properties\n\n";
-$out .= "After calling `\$wa->webhook->parse()`, the returned object has these properties:\n\n";
-$out .= "| Property | Type | Description |\n";
-$out .= "|----------|------|-------------|\n";
-$out .= "| remoteJid | string | Sender phone number (digits only) |\n";
-$out .= "| msgId | string | Message ID |\n";
-$out .= "| pushName | string | Sender display name |\n";
-$out .= "| messageType | string | Message type: text, image, audio, video, document, sticker, location, liveLocation, contact, button, list, reaction |\n";
-$out .= "| text | string | Text content (text, reaction, and list messages) |\n";
-$out .= "| selectedId | string | Selected button or list row ID |\n";
-$out .= "| title | string | List response title |\n";
-$out .= "| latitude | float | Location latitude |\n";
-$out .= "| longitude | float | Location longitude |\n";
-$out .= "| thumbnail | string | Base64 data URI for thumbnails |\n";
-$out .= "| mimetype | string | Media MIME type |\n";
-$out .= "| mediaURL | string | Direct media download URL |\n";
-$out .= "| mediaBase64 | string | Base64-encoded media content |\n";
-$out .= "| fileName | string | Document filename |\n";
-$out .= "| caption | string | Media caption |\n";
-$out .= "| messageKeys | array | Array with mediaKey, directPath, url, messageType |\n";
-$out .= "| contact | array | Array of objects with name and number properties |\n";
+// Webhook special section — Meta / "wame" envelope parser
+$out .= "## Webhook (Meta envelope)\n\n";
+$out .= "The API delivers webhooks in the Meta / \"wame\" envelope format (multichannel). `\$wa->webhook->parseMeta(\$body = null)` reads php://input (or a decoded array) and returns a list of normalized event arrays. It never throws: an invalid body returns `[]`.\n\n";
+$out .= "Every event includes these base keys:\n\n";
+$out .= "| Key | Type | Description |\n";
+$out .= "|-----|------|-------------|\n";
+$out .= "| type | string | Event type: text, image, audio, video, document, sticker, location, contacts, reaction, reaction-removed, button, list-reply, button-reply, referral, edit, unsupported, status, presence, connection.open, connection.close, qrcode, call, group.participants, group.update, health, unknown |\n";
+$out .= "| provider | string | Channel: whatsapp, instagram or messenger |\n";
+$out .= "| official | bool | True when delivered via the official Meta Cloud API |\n";
+$out .= "| field | string | Original category: messages, presence, connection, qrcode, call, groups, health |\n";
+$out .= "| instanceId | string | Instance identifier (entry[].id) |\n";
+$out .= "| metadata | array | phoneNumberId and optional displayPhoneNumber |\n";
+$out .= "| raw | array | The untouched incoming envelope |\n";
 $out .= "\n";
+$out .= "Message events additionally carry: `from`, `fromUserId` (Instagram/Messenger), `profile` (name/username/picture), `messageId`, `timestamp`, and an optional `fromMe`, `groupId`, `context`, `referral`, plus a type-specific payload (e.g. `text.body`, `image`, `audio`, `location`, `contacts`).\n\n";
 
 $out .= "## Webhook Usage Example\n\n";
 $out .= "```php\n";
-$out .= "\$wa = new WhatsApp(['server' => 'https://server.api-wa.me', 'key' => 'YOUR_KEY']);\n";
-$out .= "\$parsed = \$wa->webhook->parse();\n\n";
-$out .= "if (\$parsed && \$parsed->messageType === 'text') {\n";
-$out .= "    \$wa->message->sendText(\$parsed->remoteJid, 'You said: ' . \$parsed->text);\n";
-$out .= "}\n\n";
-$out .= "if (\$parsed && \$parsed->messageType === 'image') {\n";
-$out .= "    // Access media\n";
-$out .= "    \$url = \$parsed->mediaURL;\n";
-$out .= "    \$base64 = \$parsed->mediaBase64;\n";
-$out .= "    \$caption = \$parsed->caption ?? '';\n";
+$out .= "\$wa = new Wame(['server' => 'https://server.api-wa.me', 'key' => 'YOUR_KEY']);\n\n";
+$out .= "foreach (\$wa->webhook->parseMeta() as \$e) {\n";
+$out .= "    if (\$e['type'] === 'text') {\n";
+$out .= "        \$wa->message->sendText(\$e['from'], 'You said: ' . \$e['text']['body'], \$e['provider']);\n";
+$out .= "    }\n";
+$out .= "    if (\$e['type'] === 'image') {\n";
+$out .= "        \$mediaId = \$e['image']['id'] ?? null;\n";
+$out .= "        \$caption = \$e['image']['caption'] ?? '';\n";
+$out .= "    }\n";
 $out .= "}\n";
-$out .= "```\n";
+$out .= "```\n\n";
+$out .= "The legacy `\$wa->webhook->parse()` (baileys-style payloads) remains available but is deprecated.\n";
 
 echo $out;
